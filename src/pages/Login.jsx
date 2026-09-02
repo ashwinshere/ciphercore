@@ -8,10 +8,7 @@ import {
   ShieldCheck,
   ArrowRight,
   CheckCircle2,
-  AlertCircle,
-  Building2,
-  Cpu,
-  Layers
+  AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import CaptchaCanvas from '../components/CaptchaCanvas.jsx';
@@ -256,21 +253,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        {/* Footer Meta */}
-        <div className="mt-6 pt-5 border-t border-vertex-border/80 text-center text-[10px] text-slate-500 font-mono flex items-center justify-center gap-3">
-          <span className="flex items-center gap-1">
-            <Building2 size={11} /> RV Block 3D Twin
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <Cpu size={11} /> Spatial Engine
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <Layers size={11} /> 5 Floors Mapped
-          </span>
-        </div>
       </div>
     </div>
   );
