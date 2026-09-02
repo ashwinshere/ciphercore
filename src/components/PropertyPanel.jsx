@@ -18,21 +18,95 @@ import {
 import { useApp } from '../context/AppContext.jsx';
 import { calculateArea } from '../utils/geometry.js';
 import { detectVerticalStack } from '../utils/verticalAnalysis.js';
+import { generate3DULPIN } from '../utils/ulpin.js';
 
 export default function PropertyPanel() {
-  const { selectedRoom, allRooms, selectRoom, buildingData } = useApp();
+  const { selectedRoom, allRooms, selectRoom, buildingData, viewMode, enter3DView, selectedProperty } = useApp();
   const [copied, setCopied] = useState(false);
+
+  const bld = buildingData.building;
 
   if (!selectedRoom) {
     return (
-      <aside className="gov-card p-6 w-full h-full flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-          <Building2 size={24} />
+      <aside className="gov-card p-5 w-full h-full overflow-y-auto fade-in flex flex-col gap-4">
+        <div className="flex items-start justify-between pb-3 border-b border-cipher-border">
+          <div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-cipher-govblue flex items-center gap-1">
+              <CheckCircle2 size={12} className="text-emerald-600" />
+              Selected Property Cadastre
+            </div>
+            <h2 className="text-base font-extrabold text-cipher-navy mt-0.5">
+              {bld.name}
+            </h2>
+            <div className="text-xs text-cipher-muted mt-0.5">{bld.institution}</div>
+          </div>
         </div>
-        <h3 className="text-sm font-semibold text-cipher-navy mb-1">No Property Selected</h3>
-        <p className="text-xs text-cipher-muted max-w-xs leading-relaxed">
-          Select a spatial unit from the 3D map, 2D floor plan, or registry table to inspect official cadastral records.
-        </p>
+
+        <div className="flex flex-wrap gap-2 mb-1">
+          {bld.realWorld && (
+            <span className="px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wide rounded bg-blue-50 text-cipher-govblue border border-blue-200">
+              Real-World Satellite Location
+            </span>
+          )}
+          <span className="px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wide rounded bg-amber-50 text-amber-700 border border-amber-200">
+            Geometry: {bld.prototypeStatus}
+          </span>
+          <span className={`px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wide rounded border ${bld.geometryConfidence === 'high' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (bld.geometryConfidence === 'medium' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-700 border-red-200')}`}>
+            Confidence: {bld.geometryConfidence}
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-lg bg-slate-50 border border-cipher-border">
+          <div className="text-[10px] text-cipher-muted uppercase font-semibold mb-1">2D Land Parcel ULPIN</div>
+          <div className="mono text-xs font-bold text-cipher-navy break-all">{bld.ulpin2D || 'N/A'}</div>
+        </div>
+
+        <div>
+          <div className="text-[11px] font-bold text-cipher-navy uppercase tracking-wide mb-2">
+            Building Cadastral Specifications
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+              <div className="text-[10px] text-cipher-muted font-medium">PROPERTY TYPE</div>
+              <div className="font-semibold text-cipher-navy mt-0.5">{bld.propertyType || 'Building'}</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+              <div className="text-[10px] text-cipher-muted font-medium">SPATIAL FLOORS</div>
+              <div className="font-semibold text-cipher-navy mt-0.5">{buildingData.floors.length} Levels</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+              <div className="text-[10px] text-cipher-muted font-medium">FOOTPRINT DIMENSIONS</div>
+              <div className="font-semibold text-cipher-navy mt-0.5 mono text-[11px]">
+                {bld.footprintWidthM}m × {bld.footprintDepthM}m
+              </div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+              <div className="text-[10px] text-cipher-muted font-medium">TOTAL 3D UNITS</div>
+              <div className="font-semibold text-cipher-navy mt-0.5 mono">{allRooms.length} Spatial Units</div>
+            </div>
+          </div>
+        </div>
+
+        {viewMode === 'map' ? (
+          <div className="mt-auto pt-4 border-t border-cipher-border flex flex-col gap-2">
+            <button
+              onClick={() => enter3DView(selectedProperty)}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-cipher-govblue hover:bg-cipher-navy text-white text-xs font-extrabold shadow-card transition-all group"
+            >
+              <Building2 size={16} />
+              <span>View 3D Property</span>
+              <GitCommit size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <p className="text-[10px] text-cipher-muted text-center">
+              Extrudes {bld.name}'s 2D satellite footprint into an interactive 3D digital twin.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-auto text-center flex flex-col items-center text-xs text-cipher-muted pt-4 border-t border-cipher-border">
+            <Layers size={22} className="mb-1.5 text-slate-300" />
+            <p className="max-w-[200px] text-[11px]">Select any unit or floor level in the 3D canvas to inspect its 3D ULPIN.</p>
+          </div>
+        )}
       </aside>
     );
   }
@@ -40,8 +114,10 @@ export default function PropertyPanel() {
   const { above, below, stack } = detectVerticalStack(selectedRoom, allRooms);
   const area = calculateArea(selectedRoom);
 
+  const ulpin3D = generate3DULPIN(buildingData.building, selectedRoom.floorId, selectedRoom.number);
+
   const handleCopy = () => {
-    navigator.clipboard?.writeText(selectedRoom.id);
+    navigator.clipboard?.writeText(ulpin3D);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -78,7 +154,7 @@ export default function PropertyPanel() {
         </div>
         <div className="flex items-center justify-between gap-2 mt-1">
           <span className="mono text-xs font-bold text-cipher-navy break-all select-all">
-            {selectedRoom.id}
+            {ulpin3D}
           </span>
           <button
             onClick={handleCopy}
@@ -97,9 +173,9 @@ export default function PropertyPanel() {
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
-            <div className="text-[10px] text-cipher-muted font-medium">SURVEY NUMBER</div>
-            <div className="font-semibold text-cipher-navy mt-0.5 mono">
-              {selectedRoom.number}/2A
+            <div className="text-[10px] text-cipher-muted font-medium">2D ULPIN</div>
+            <div className="font-semibold text-cipher-navy mt-0.5 mono text-[10px]">
+              {buildingData.building.ulpin2D || 'N/A'}
             </div>
           </div>
           <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
@@ -127,10 +203,10 @@ export default function PropertyPanel() {
             </div>
           </div>
           <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-borderLight">
-            <div className="text-[10px] text-cipher-muted font-medium">CADASTRE STATUS</div>
-            <div className="font-semibold text-cipher-success mt-0.5 flex items-center gap-1">
+            <div className="text-[10px] text-cipher-muted font-medium">GEOMETRY STATUS</div>
+            <div className="font-semibold text-amber-600 mt-0.5 flex items-center gap-1">
               <ShieldCheck size={12} />
-              {selectedRoom.officialReference ? 'Verified Record' : 'Pilot Survey'}
+              Approximate ({buildingData.building.geometryConfidence})
             </div>
           </div>
         </div>

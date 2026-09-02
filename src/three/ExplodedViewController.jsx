@@ -21,7 +21,7 @@ export default function ExplodedViewController({ className = '' }) {
       } ${className}`}
     >
       <Layers size={13} className={explodedView ? 'text-white' : 'text-cipher-govblue'} />
-      {explodedView ? 'Exploded View: Active' : 'Exploded View'}
+      {explodedView ? 'Assemble Building' : 'Exploded View'}
     </button>
   );
 }

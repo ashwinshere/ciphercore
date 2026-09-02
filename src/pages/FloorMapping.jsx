@@ -1,187 +1,160 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { generateVerticalPropertyId } from '../utils/propertyId.js';
-import { CORRIDOR, STAIRCASE, BUILDING_BOUNDARY } from '../data/buildingData.js';
-import PropertyPanel from '../components/PropertyPanel.jsx';
-import { Layers, MapPin, CheckCircle2 } from 'lucide-react';
-
-const PADDING = 4;
+import { Layers, Building2, MapPin, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function FloorMapping() {
-  const { buildingData, selectedRoom, selectRoom } = useApp();
-  const [activeFloorId, setActiveFloorId] = useState(buildingData.floors[0].id);
+  const { buildingData, selectedProperty, selectRoom, selectedRoom, setViewMode, setCurrentPage } = useApp();
+  const [activeFloorIndex, setActiveFloorIndex] = useState(0);
 
-  // Keep the 2D floor selector in sync if a room gets selected elsewhere.
-  useEffect(() => {
-    if (selectedRoom) setActiveFloorId(selectedRoom.floorId);
-  }, [selectedRoom]);
+  const bld = buildingData.building;
+  const currentFloor = buildingData.floors[activeFloorIndex] || buildingData.floors[0];
 
-  const floor = buildingData.floors.find((f) => f.id === activeFloorId);
-
-  const viewBox = useMemo(() => {
-    const w = BUILDING_BOUNDARY.xMax - BUILDING_BOUNDARY.xMin + PADDING * 2;
-    const h = BUILDING_BOUNDARY.yMax - BUILDING_BOUNDARY.yMin + PADDING * 2;
-    return `${BUILDING_BOUNDARY.xMin - PADDING} ${BUILDING_BOUNDARY.yMin - PADDING} ${w} ${h}`;
-  }, []);
+  if (!selectedProperty && !bld) {
+    return (
+      <div className="fade-in p-8 text-center bg-white border border-cipher-border rounded-xl shadow-subtle flex flex-col items-center">
+        <Building2 size={36} className="text-slate-400 mb-3" />
+        <h2 className="text-lg font-bold text-cipher-navy mb-1">No Property Selected</h2>
+        <p className="text-xs text-cipher-muted max-w-sm mb-4">
+          Please select a building from the satellite map to inspect its floor plans and unit layout.
+        </p>
+        <button
+          onClick={() => {
+            setViewMode('map');
+            setCurrentPage('dashboard');
+          }}
+          className="px-4 py-2 bg-cipher-govblue text-white rounded-lg text-xs font-bold shadow-subtle hover:bg-cipher-navy transition-colors"
+        >
+          Select Building on Map
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="fade-in h-full flex flex-col gap-4 pb-4">
+    <div className="fade-in space-y-5 pb-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-cipher-border">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
-              2D Cadastral Mapping
+              2D Architectural Floor Cadastre
             </span>
             <span className="text-xs text-cipher-muted">·</span>
-            <span className="text-xs text-cipher-muted font-medium">
-              {buildingData.building.name} · Elevation +{floor.elevation.toFixed(1)}m
+            <span className="text-xs text-cipher-muted font-medium flex items-center gap-1">
+              <MapPin size={12} className="text-cipher-govblue" />
+              {bld.name} ({bld.ulpin2D})
             </span>
           </div>
           <h1 className="text-xl font-extrabold text-cipher-navy tracking-tight">
-            Building &amp; Floor Plans
+            Building &amp; Floor Plans — {bld.name}
           </h1>
         </div>
 
-        {/* Floor Switcher */}
-        <div className="flex items-center gap-1.5 overflow-x-auto bg-white p-1 rounded-lg border border-cipher-border shadow-subtle">
-          {buildingData.floors.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setActiveFloorId(f.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 ${
-                activeFloorId === f.id
-                  ? 'bg-cipher-govblue text-white shadow-subtle'
-                  : 'text-cipher-muted hover:text-cipher-navy hover:bg-slate-50'
-              }`}
-            >
-              {f.name}
-            </button>
-          ))}
+        <button
+          onClick={() => {
+            setViewMode('3d');
+            setCurrentPage('dashboard');
+          }}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cipher-govblue text-white text-xs font-bold hover:bg-cipher-navy transition-all shadow-subtle"
+        >
+          <Building2 size={14} /> Open 3D Digital Twin
+        </button>
+      </div>
+
+      {/* Building Overview Banner */}
+      <div className="bg-white border border-cipher-border rounded-xl p-4 shadow-subtle grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div>
+          <div className="text-[10px] text-cipher-muted uppercase font-semibold">BUILDING NAME</div>
+          <div className="font-bold text-cipher-navy text-sm mt-0.5">{bld.name}</div>
+          <div className="text-[11px] text-cipher-muted">{bld.institution}</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-cipher-muted uppercase font-semibold">2D LAND ULPIN</div>
+          <div className="mono font-bold text-cipher-navy text-xs mt-0.5">{bld.ulpin2D}</div>
+          <div className="text-[11px] text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+            <CheckCircle2 size={11} /> Cadastral Record Verified
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-cipher-muted uppercase font-semibold">FOOTPRINT DIMENSIONS</div>
+          <div className="font-bold text-cipher-navy text-xs mt-0.5 mono">
+            {bld.footprintWidthM}m × {bld.footprintDepthM}m
+          </div>
+          <div className="text-[11px] text-cipher-muted">{buildingData.floors.length} Spatial Floor Levels</div>
+        </div>
+        <div>
+          <div className="text-[10px] text-cipher-muted uppercase font-semibold">PROPERTY TYPE</div>
+          <div className="font-bold text-cipher-navy text-xs mt-0.5">{bld.propertyType}</div>
+          <div className="text-[11px] text-amber-600 font-medium flex items-center gap-1 mt-0.5">
+            <ShieldCheck size={11} /> Geometry: {bld.prototypeStatus}
+          </div>
         </div>
       </div>
 
-      {/* Main View + Property Panel */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4 flex-1 min-h-[520px]">
-        <div className="gov-card p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-cipher-border">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-cipher-navy">{floor.name} Cadastral Layout</span>
-              <span className="text-xs text-cipher-muted">({floor.rooms.length} Units Surveyed)</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-cipher-muted">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-blue-50 border border-cipher-govblue" /> Room
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-slate-200" /> Corridor
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-amber-200 border border-amber-400" /> Core / Stair
-              </span>
-            </div>
-          </div>
+      {/* Floor Selection Tabs */}
+      <div className="flex items-center gap-2 border-b border-cipher-border pb-3 overflow-x-auto">
+        <span className="text-xs font-bold text-cipher-navy uppercase tracking-wider mr-2">Select Floor Level:</span>
+        {buildingData.floors.map((fl, idx) => (
+          <button
+            key={fl.id}
+            onClick={() => setActiveFloorIndex(idx)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+              activeFloorIndex === idx
+                ? 'bg-cipher-govblue text-white border-cipher-govblue shadow-subtle'
+                : 'bg-white text-cipher-navy border-cipher-border hover:bg-slate-50'
+            }`}
+          >
+            {fl.name} ({fl.rooms.length} Units)
+          </button>
+        ))}
+      </div>
 
-          <div className="flex-1 min-h-[420px] rounded-lg bg-[#F8FAFC] border border-cipher-border overflow-hidden p-2 relative">
-            <svg viewBox={viewBox} className="w-full h-full drop-shadow-xs" style={{ transform: 'scaleY(-1)' }}>
-              {/* building boundary */}
-              <rect
-                x={BUILDING_BOUNDARY.xMin}
-                y={BUILDING_BOUNDARY.yMin}
-                width={BUILDING_BOUNDARY.xMax - BUILDING_BOUNDARY.xMin}
-                height={BUILDING_BOUNDARY.yMax - BUILDING_BOUNDARY.yMin}
-                fill="none"
-                stroke="#CBD5E1"
-                strokeDasharray="1.5 1.5"
-                strokeWidth="0.2"
-              />
-              {/* corridor */}
-              <rect
-                x={CORRIDOR.x}
-                y={CORRIDOR.y}
-                width={CORRIDOR.width}
-                height={CORRIDOR.depth}
-                fill="#E2E8F0"
-                opacity="0.9"
-                stroke="#CBD5E1"
-                strokeWidth="0.1"
-              />
-              {/* staircase / core */}
-              <rect
-                x={STAIRCASE.x}
-                y={STAIRCASE.y}
-                width={STAIRCASE.width}
-                height={STAIRCASE.depth}
-                fill="#FEF3C7"
-                stroke="#F59E0B"
-                strokeWidth="0.2"
-              />
-              <text
-                x={STAIRCASE.x + STAIRCASE.width / 2}
-                y={STAIRCASE.y + STAIRCASE.depth / 2}
-                fontSize="1.1"
-                fill="#B45309"
-                fontWeight="bold"
-                textAnchor="middle"
-                transform={`scale(1,-1) translate(0, ${-2 * (STAIRCASE.y + STAIRCASE.depth / 2)})`}
-              >
-                CORE
-              </text>
-
-              {/* rooms */}
-              {floor.rooms.map((room) => {
-                const id = generateVerticalPropertyId(floor, room);
-                const isSelected = selectedRoom?.id === id;
-                return (
-                  <g
-                    key={id}
-                    onClick={() => selectRoom(id, { focus: true })}
-                    className="cursor-pointer transition-all"
-                  >
-                    <rect
-                      x={room.x}
-                      y={room.y}
-                      width={room.width}
-                      height={room.depth}
-                      fill={isSelected ? '#123B63' : '#EFF6FF'}
-                      stroke={isSelected ? '#1E3A8A' : '#1E5A96'}
-                      strokeWidth={isSelected ? '0.35' : '0.18'}
-                      rx="0.2"
-                    />
-                    <text
-                      x={room.x + room.width / 2}
-                      y={room.y + room.depth / 2 + 0.4}
-                      fontSize="1.05"
-                      fontWeight="bold"
-                      fill={isSelected ? '#FFFFFF' : '#123B63'}
-                      textAnchor="middle"
-                      transform={`scale(1,-1) translate(0, ${-2 * (room.y + room.depth / 2 + 0.4)})`}
-                    >
-                      {room.name}
-                    </text>
-                    <text
-                      x={room.x + room.width / 2}
-                      y={room.y + room.depth / 2 - 0.9}
-                      fontSize="0.75"
-                      fill={isSelected ? '#93C5FD' : '#64748B'}
-                      textAnchor="middle"
-                      transform={`scale(1,-1) translate(0, ${-2 * (room.y + room.depth / 2 - 0.9)})`}
-                    >
-                      {room.type}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+      {/* 2D Floor Plan Layout Display */}
+      <div className="gov-card p-5">
+        <div className="flex items-center justify-between pb-3 border-b border-cipher-border mb-4">
+          <div>
+            <h3 className="text-sm font-bold text-cipher-navy">
+              {currentFloor.name} Layout ({currentFloor.rooms.length} Spatial Units)
+            </h3>
+            <p className="text-xs text-cipher-muted">
+              Click any spatial unit box to view its 3D ULPIN identifier and cadastral attributes.
+            </p>
           </div>
-          <div className="flex items-center justify-between text-[11px] text-cipher-muted mt-3 pt-2 border-t border-cipher-borderLight">
-            <span>Click any parcel polygon to view cadastral record and vertical relationships.</span>
-            <span className="mono font-semibold text-cipher-navy">Grid: Metres (EPSG Prototype)</span>
-          </div>
+          <span className="mono text-xs font-bold text-cipher-govblue bg-blue-50 border border-blue-200 px-2.5 py-1 rounded">
+            LEVEL: {currentFloor.shortName.toUpperCase()} (+{currentFloor.elevation}m)
+          </span>
         </div>
 
-        <div className="h-full min-h-[460px]">
-          <PropertyPanel />
+        {/* 2D Unit Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {currentFloor.rooms.map((rm) => {
+            const isSel = selectedRoom?.id === rm.id;
+            return (
+              <div
+                key={rm.id}
+                onClick={() => selectRoom(rm.id)}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  isSel
+                    ? 'bg-blue-50 border-cipher-govblue shadow-subtle ring-2 ring-cipher-govblue/20'
+                    : 'bg-cipher-bg border-cipher-border hover:border-cipher-govblue hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-extrabold text-cipher-navy text-xs">{rm.name}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-cipher-muted font-medium">
+                    {rm.type}
+                  </span>
+                </div>
+                <div className="text-[10px] text-cipher-govblue mono font-bold break-all mb-2">
+                  {rm.id}
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-cipher-muted pt-2 border-t border-cipher-borderLight">
+                  <span>Size: {rm.width.toFixed(1)}m × {rm.depth.toFixed(1)}m</span>
+                  <span className="font-semibold text-cipher-navy">{(rm.width * rm.depth).toFixed(0)} m²</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

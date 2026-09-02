@@ -17,8 +17,9 @@
  * @param {object} room - room object from buildingData (needs number)
  * @returns {string}
  */
-export function generateVerticalPropertyId(floor, room) {
-  return `TN-TRY-SCE-RV-F${floor.numId}-R${room.number}`;
+export function generateVerticalPropertyId(floor, room, buildingPrefix) {
+  const prefix = buildingPrefix || 'TN-TRY-SCE-RV';
+  return `${prefix}-F${floor.numId}-R${room.number}`;
 }
 
 /**
@@ -30,11 +31,13 @@ export function generateVerticalPropertyId(floor, room) {
  */
 export function flattenRooms(buildingData) {
   const flat = [];
+  if (!buildingData || !buildingData.floors) return flat;
+  const buildingPrefix = buildingData.building?.ulpin2D || buildingData.building?.buildingCode || 'TN-TRY-SCE-RV';
   buildingData.floors.forEach((floor) => {
     floor.rooms.forEach((room) => {
       flat.push({
         ...room,
-        id: generateVerticalPropertyId(floor, room),
+        id: generateVerticalPropertyId(floor, room, buildingPrefix),
         floorId: floor.id,
         floorNumId: floor.numId,
         floorName: floor.name,

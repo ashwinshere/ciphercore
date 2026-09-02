@@ -18,9 +18,10 @@ import BuildingScene from '../three/BuildingScene.jsx';
 import BuildingControls from '../three/BuildingControls.jsx';
 import PropertyPanel from '../components/PropertyPanel.jsx';
 import FloorSelector from '../components/FloorSelector.jsx';
+import ULPINMap from '../components/ULPINMap.jsx';
 
 export default function Dashboard() {
-  const { buildingData, allRooms, conflicts, setCurrentPage, selectRoom } = useApp();
+  const { buildingData, allRooms, conflicts, setCurrentPage, selectRoom, viewMode, setViewMode } = useApp();
 
   const verticalRelationships = useMemo(() => countVerticalRelationships(allRooms), [allRooms]);
 
@@ -141,30 +142,40 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Central Spatial Visualizer (65%) + Property Information Panel (35%) */}
+      {/* Central Spatial Visualizer (1fr) + Property Information Panel (360px) */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-cipher-navy uppercase tracking-wide">
-              3D Spatial Property Overview
-            </h2>
-            <span className="text-xs text-cipher-muted">
-              · Interactive Cadastral Digital Twin
-            </span>
+        {viewMode === '3d' && (
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-cipher-navy uppercase tracking-wide">
+                3D Digital Twin Representation
+              </h2>
+              <span className="text-xs text-cipher-muted">
+                · Extruded Satellite Footprint
+              </span>
+            </div>
+            <BuildingControls />
           </div>
-          <BuildingControls />
-        </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 min-h-[560px]">
-          {/* 3D Spatial Canvas */}
+          {/* Main Visualizer Area: 2D Satellite Map or 3D Digital Twin */}
           <div className="flex flex-col gap-3 h-full min-h-[460px]">
-            <div className="flex-1 min-h-[440px]">
-              <BuildingScene height="100%" />
-            </div>
-            <FloorSelector />
+            {viewMode === 'map' ? (
+              <div className="flex-1 min-h-[520px]">
+                <ULPINMap />
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 min-h-[440px]">
+                  <BuildingScene height="100%" />
+                </div>
+                <FloorSelector />
+              </>
+            )}
           </div>
 
-          {/* Right Information Panel */}
+          {/* Right Information Panel (Always Synced to selectedProperty) */}
           <div className="h-full min-h-[500px]">
             <PropertyPanel />
           </div>

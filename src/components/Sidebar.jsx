@@ -8,7 +8,6 @@ import {
   Database,
   History,
   Building2,
-  FileCheck,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 
@@ -23,8 +22,20 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { currentPage, setCurrentPage, conflicts } = useApp();
+  const { currentPage, setCurrentPage, viewMode, setViewMode, conflicts, selectedProperty } = useApp();
   const conflictCount = conflicts.length;
+
+  const handleNavClick = (id) => {
+    if (id === 'dashboard') {
+      setCurrentPage('dashboard');
+      setViewMode('map');
+    } else if (id === 'explorer') {
+      setCurrentPage('dashboard');
+      setViewMode('3d');
+    } else {
+      setCurrentPage(id);
+    }
+  };
 
   return (
     <aside className="w-64 shrink-0 bg-white border-r border-cipher-border flex flex-col py-4 px-3 gap-1 shadow-subtle select-none">
@@ -37,11 +48,18 @@ export default function Sidebar() {
       <div className="flex flex-col gap-1 flex-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const active = currentPage === item.id;
+          let active = currentPage === item.id;
+
+          if (currentPage === 'dashboard') {
+            if (viewMode === 'map' && item.id === 'dashboard') active = true;
+            if (viewMode === '3d' && item.id === 'explorer') active = true;
+            if (viewMode === '3d' && item.id === 'dashboard') active = false;
+          }
+
           return (
             <button
               key={item.id}
-              onClick={() => setCurrentPage(item.id)}
+              onClick={() => handleNavClick(item.id)}
               className={`relative flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
                 active
                   ? 'bg-blue-50/80 text-cipher-navy font-semibold'
@@ -71,19 +89,19 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* Cadastral Pilot Info Footer */}
+      {/* Cadastral Active Property Info Footer */}
       <div className="pt-3 border-t border-cipher-border/80 mt-auto">
-        <div className="p-3 rounded-lg bg-cipher-bg border border-cipher-border text-xs leading-relaxed">
+        <div className="p-3 rounded-lg bg-slate-50 border border-cipher-border text-xs leading-relaxed">
           <div className="flex items-center gap-1.5 font-semibold text-cipher-navy text-[11px] mb-1">
             <Building2 size={13} className="text-cipher-govblue" />
-            <span>Pilot Cadastral Entity</span>
+            <span>Active Property</span>
           </div>
-          <p className="text-[11px] text-cipher-muted">
-            RV Block, SCE Complex
+          <p className="text-[11px] text-cipher-navy font-bold truncate">
+            {selectedProperty?.name || 'Saranathan Campus'}
           </p>
           <div className="mt-2 pt-2 border-t border-cipher-border/60 flex items-center justify-between text-[10px] text-cipher-muted">
-            <span>Spatial Model</span>
-            <span className="font-semibold text-cipher-govblue">3D ULPIN v2.4</span>
+            <span>ULPIN:</span>
+            <span className="font-semibold text-cipher-govblue mono">{selectedProperty?.ulpin2D}</span>
           </div>
         </div>
       </div>

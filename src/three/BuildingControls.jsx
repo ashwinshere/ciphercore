@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Eye, EyeOff, Maximize2 } from 'lucide-react';
+import { RotateCcw, Eye, EyeOff, Maximize2, Map } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import ExplodedViewController from './ExplodedViewController.jsx';
 
@@ -11,10 +11,19 @@ export default function BuildingControls() {
     visibleFloorIds,
     toggleFloorVisibility,
     resetCamera,
+    backToMap
   } = useApp();
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <button
+        onClick={backToMap}
+        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-cipher-govblue text-white hover:bg-cipher-navy transition-all shadow-subtle group"
+      >
+        <Map size={14} className="text-white group-hover:-translate-x-0.5 transition-transform" />
+        <span>Back to 2D Map</span>
+      </button>
+
       <button
         onClick={resetCamera}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-cipher-border text-cipher-navy hover:bg-slate-50 hover:border-slate-300 transition-all shadow-subtle"

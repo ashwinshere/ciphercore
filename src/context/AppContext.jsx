@@ -1,24 +1,65 @@
 import React, { createContext, useContext, useMemo, useState, useCallback } from 'react';
-import { buildingData, TIMELINE_YEARS } from '../data/buildingData.js';
+import properties from '../data/properties.js';
+import { generateBuildingData, TIMELINE_YEARS } from '../data/buildingData.js';
 import { flattenRooms } from '../utils/propertyId.js';
 import { detectAllConflicts } from '../utils/conflictDetection.js';
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const allRooms = useMemo(() => flattenRooms(buildingData), []);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [viewMode, setViewMode] = useState('map'); // 'map' or '3d'
+  
+  // Default selected property to RV Block (properties[0]) so it's active from start
+  const [selectedProperty, setSelectedProperty] = useState(properties[0]);
+  
+  const buildingData = useMemo(() => {
+    return generateBuildingData(selectedProperty || properties[0]);
+  }, [selectedProperty]);
+
+  const allRooms = useMemo(() => flattenRooms(buildingData), [buildingData]);
   const conflicts = useMemo(() => detectAllConflicts(allRooms), [allRooms]);
 
-  const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [hoveredRoomId, setHoveredRoomId] = useState(null);
   const [explodedView, setExplodedView] = useState(false);
-  const [isolatedFloorId, setIsolatedFloorId] = useState(null); // null = show all floors
+  const [isolatedFloorId, setIsolatedFloorId] = useState(null);
   const [visibleFloorIds, setVisibleFloorIds] = useState(() => buildingData.floors.map((f) => f.id));
+  
+  React.useEffect(() => {
+    setVisibleFloorIds(buildingData.floors.map((f) => f.id));
+  }, [buildingData]);
+
   const [timelineYear, setTimelineYear] = useState(TIMELINE_YEARS[TIMELINE_YEARS.length - 1]);
-  const [focusRequest, setFocusRequest] = useState(0); // increments to trigger camera focus
-  const [resetRequest, setResetRequest] = useState(0); // increments to trigger camera reset
+  const [focusRequest, setFocusRequest] = useState(0);
+  const [resetRequest, setResetRequest] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Select property on map and directly open 3D detail view
+  const selectProperty = useCallback((property) => {
+    if (property) setSelectedProperty(property);
+    setViewMode('3d');
+    setSelectedRoomId(null);
+    setIsolatedFloorId(null);
+    setExplodedView(false);
+  }, []);
+
+  const selectPropertyOnMap = useCallback((property) => {
+    if (property) setSelectedProperty(property);
+    setSelectedRoomId(null);
+    setIsolatedFloorId(null);
+    setExplodedView(false);
+  }, []);
+
+  const enter3DView = useCallback((property) => {
+    selectProperty(property);
+  }, [selectProperty]);
+
+  // Return back to 2D map view keeping selected property retained
+  const backToMap = useCallback(() => {
+    setViewMode('map');
+    setCurrentPage('dashboard');
+  }, []);
 
   const resetCamera = useCallback(() => {
     setSelectedRoomId(null);
@@ -47,6 +88,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const value = {
+    properties,
     buildingData,
     allRooms,
     conflicts,
@@ -55,6 +97,14 @@ export function AppProvider({ children }) {
     selectedRoomId,
     selectedRoom,
     selectRoom,
+    selectedProperty,
+    setSelectedProperty,
+    selectPropertyOnMap,
+    enter3DView,
+    backToMap,
+    selectProperty,
+    viewMode,
+    setViewMode,
     hoveredRoomId,
     setHoveredRoomId,
     explodedView,
