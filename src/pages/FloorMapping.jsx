@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext.jsx';
 import { generateVerticalPropertyId } from '../utils/propertyId.js';
 import { CORRIDOR, STAIRCASE, BUILDING_BOUNDARY } from '../data/buildingData.js';
 import PropertyPanel from '../components/PropertyPanel.jsx';
-import { LayoutGrid } from 'lucide-react';
+import { Layers, MapPin, CheckCircle2 } from 'lucide-react';
 
 const PADDING = 4;
 
@@ -25,39 +25,65 @@ export default function FloorMapping() {
   }, []);
 
   return (
-    <div className="fade-in h-full flex flex-col gap-4">
-      <div>
-        <h1 className="text-lg font-bold text-white flex items-center gap-2">
-          <LayoutGrid size={18} className="text-vertex-cyan" />
-          Floor-wise Property Mapping
-        </h1>
-        <p className="text-xs text-slate-500">2D top-down plan auto-generated from room coordinate data.</p>
-      </div>
-
-      <div className="flex items-center gap-2 flex-wrap">
-        {buildingData.floors.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setActiveFloorId(f.id)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              activeFloorId === f.id
-                ? 'bg-vertex-cyan text-vertex-bg border-vertex-cyan font-semibold'
-                : 'glass text-slate-300 border-vertex-border hover:border-vertex-cyan/40'
-            }`}
-          >
-            {f.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4 flex-1 min-h-[520px]">
-        <div className="glass rounded-xl border border-vertex-border p-4 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-white">{floor.name}</span>
-            <span className="text-[11px] text-slate-500">Elevation {floor.elevation.toFixed(1)} m</span>
+    <div className="fade-in h-full flex flex-col gap-4 pb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-cipher-border">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
+              2D Cadastral Mapping
+            </span>
+            <span className="text-xs text-cipher-muted">·</span>
+            <span className="text-xs text-cipher-muted font-medium">
+              {buildingData.building.name} · Elevation +{floor.elevation.toFixed(1)}m
+            </span>
           </div>
-          <div className="flex-1 min-h-[420px] rounded-lg bg-[#040910] border border-vertex-border overflow-hidden">
-            <svg viewBox={viewBox} className="w-full h-full" style={{ transform: 'scaleY(-1)' }}>
+          <h1 className="text-xl font-extrabold text-cipher-navy tracking-tight">
+            Building &amp; Floor Plans
+          </h1>
+        </div>
+
+        {/* Floor Switcher */}
+        <div className="flex items-center gap-1.5 overflow-x-auto bg-white p-1 rounded-lg border border-cipher-border shadow-subtle">
+          {buildingData.floors.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFloorId(f.id)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 ${
+                activeFloorId === f.id
+                  ? 'bg-cipher-govblue text-white shadow-subtle'
+                  : 'text-cipher-muted hover:text-cipher-navy hover:bg-slate-50'
+              }`}
+            >
+              {f.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main View + Property Panel */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4 flex-1 min-h-[520px]">
+        <div className="gov-card p-5 flex flex-col">
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-cipher-border">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm text-cipher-navy">{floor.name} Cadastral Layout</span>
+              <span className="text-xs text-cipher-muted">({floor.rooms.length} Units Surveyed)</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-cipher-muted">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-blue-50 border border-cipher-govblue" /> Room
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-slate-200" /> Corridor
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-amber-200 border border-amber-400" /> Core / Stair
+              </span>
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-[420px] rounded-lg bg-[#F8FAFC] border border-cipher-border overflow-hidden p-2 relative">
+            <svg viewBox={viewBox} className="w-full h-full drop-shadow-xs" style={{ transform: 'scaleY(-1)' }}>
               {/* building boundary */}
               <rect
                 x={BUILDING_BOUNDARY.xMin}
@@ -65,9 +91,9 @@ export default function FloorMapping() {
                 width={BUILDING_BOUNDARY.xMax - BUILDING_BOUNDARY.xMin}
                 height={BUILDING_BOUNDARY.yMax - BUILDING_BOUNDARY.yMin}
                 fill="none"
-                stroke="#1b2c44"
-                strokeDasharray="1 1"
-                strokeWidth="0.15"
+                stroke="#CBD5E1"
+                strokeDasharray="1.5 1.5"
+                strokeWidth="0.2"
               />
               {/* corridor */}
               <rect
@@ -75,8 +101,10 @@ export default function FloorMapping() {
                 y={CORRIDOR.y}
                 width={CORRIDOR.width}
                 height={CORRIDOR.depth}
-                fill="#14304a"
-                opacity="0.6"
+                fill="#E2E8F0"
+                opacity="0.9"
+                stroke="#CBD5E1"
+                strokeWidth="0.1"
               />
               {/* staircase / core */}
               <rect
@@ -84,16 +112,16 @@ export default function FloorMapping() {
                 y={STAIRCASE.y}
                 width={STAIRCASE.width}
                 height={STAIRCASE.depth}
-                fill="#f59e0b"
-                opacity="0.25"
-                stroke="#f59e0b"
-                strokeWidth="0.15"
+                fill="#FEF3C7"
+                stroke="#F59E0B"
+                strokeWidth="0.2"
               />
               <text
                 x={STAIRCASE.x + STAIRCASE.width / 2}
                 y={STAIRCASE.y + STAIRCASE.depth / 2}
                 fontSize="1.1"
-                fill="#f59e0b"
+                fill="#B45309"
+                fontWeight="bold"
                 textAnchor="middle"
                 transform={`scale(1,-1) translate(0, ${-2 * (STAIRCASE.y + STAIRCASE.depth / 2)})`}
               >
@@ -105,38 +133,54 @@ export default function FloorMapping() {
                 const id = generateVerticalPropertyId(floor, room);
                 const isSelected = selectedRoom?.id === id;
                 return (
-                  <g key={id} onClick={() => selectRoom(id, { focus: true })} className="cursor-pointer">
+                  <g
+                    key={id}
+                    onClick={() => selectRoom(id, { focus: true })}
+                    className="cursor-pointer transition-all"
+                  >
                     <rect
                       x={room.x}
                       y={room.y}
                       width={room.width}
                       height={room.depth}
-                      fill={isSelected ? '#22d3ee' : '#3b82f6'}
-                      opacity={isSelected ? 0.55 : 0.25}
-                      stroke={isSelected ? '#67e8f9' : '#3b82f6'}
-                      strokeWidth="0.15"
+                      fill={isSelected ? '#123B63' : '#EFF6FF'}
+                      stroke={isSelected ? '#1E3A8A' : '#1E5A96'}
+                      strokeWidth={isSelected ? '0.35' : '0.18'}
+                      rx="0.2"
                     />
                     <text
                       x={room.x + room.width / 2}
-                      y={room.y + room.depth / 2}
-                      fontSize="1"
-                      fill={isSelected ? '#ecfeff' : '#cbd5e1'}
+                      y={room.y + room.depth / 2 + 0.4}
+                      fontSize="1.05"
+                      fontWeight="bold"
+                      fill={isSelected ? '#FFFFFF' : '#123B63'}
                       textAnchor="middle"
-                      transform={`scale(1,-1) translate(0, ${-2 * (room.y + room.depth / 2)})`}
+                      transform={`scale(1,-1) translate(0, ${-2 * (room.y + room.depth / 2 + 0.4)})`}
                     >
                       {room.name}
+                    </text>
+                    <text
+                      x={room.x + room.width / 2}
+                      y={room.y + room.depth / 2 - 0.9}
+                      fontSize="0.75"
+                      fill={isSelected ? '#93C5FD' : '#64748B'}
+                      textAnchor="middle"
+                      transform={`scale(1,-1) translate(0, ${-2 * (room.y + room.depth / 2 - 0.9)})`}
+                    >
+                      {room.type}
                     </text>
                   </g>
                 );
               })}
             </svg>
           </div>
-          <p className="text-[10px] text-slate-500 mt-3">
-            Click any room to select it — selection stays in sync with the 3D Explorer and Property Panel.
-          </p>
+          <div className="flex items-center justify-between text-[11px] text-cipher-muted mt-3 pt-2 border-t border-cipher-borderLight">
+            <span>Click any parcel polygon to view cadastral record and vertical relationships.</span>
+            <span className="mono font-semibold text-cipher-navy">Grid: Metres (EPSG Prototype)</span>
+          </div>
         </div>
 
-        <div className="h-full min-h-[400px]">
+        <div className="h-full min-h-[460px]">
           <PropertyPanel />
         </div>
       </div>

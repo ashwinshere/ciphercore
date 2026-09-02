@@ -106,10 +106,10 @@ export default function Login() {
             <Box size={32} className="text-vertex-cyan animate-pulse" />
           </div>
           <h1 className="text-2xl font-black tracking-wider text-white flex items-center justify-center gap-2">
-            VERTEX <span className="text-vertex-cyan text-xs font-mono uppercase px-2 py-0.5 rounded bg-vertex-cyan/10 border border-vertex-cyan/30">v1.0</span>
+            CIPHERCORE <span className="text-vertex-cyan text-xs font-mono uppercase px-2 py-0.5 rounded bg-vertex-cyan/10 border border-vertex-cyan/30">3D CADASTRE</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest font-mono">
-            3D Property Intelligence Platform
+            3D Land &amp; Property Information System
           </p>
         </div>
 
@@ -247,7 +247,7 @@ export default function Login() {
               </>
             ) : (
               <>
-                <span>Sign In to VERTEX</span>
+                <span>Sign In to CIPHERCORE</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </>
             )}

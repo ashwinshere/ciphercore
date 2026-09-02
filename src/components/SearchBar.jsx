@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, CheckCircle2, ChevronRight, Building } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 
 export default function SearchBar() {
@@ -17,7 +17,8 @@ export default function SearchBar() {
           r.name.toLowerCase().includes(q) ||
           r.id.toLowerCase().includes(q) ||
           r.number.toLowerCase().includes(q) ||
-          r.type.toLowerCase().includes(q)
+          r.type.toLowerCase().includes(q) ||
+          (r.floorName && r.floorName.toLowerCase().includes(q))
       )
       .slice(0, 8);
   }, [query, allRooms]);
@@ -30,9 +31,9 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="relative">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass border border-vertex-border focus-within:border-vertex-cyan/50 transition-colors">
-        <Search size={14} className="text-slate-500" />
+    <div className="relative w-full">
+      <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg bg-cipher-bg border border-cipher-border hover:border-slate-300 focus-within:border-cipher-govblue focus-within:bg-white focus-within:ring-2 focus-within:ring-cipher-govblue/15 transition-all shadow-subtle">
+        <Search size={15} className="text-cipher-muted shrink-0" />
         <input
           ref={inputRef}
           value={query}
@@ -45,36 +46,70 @@ export default function SearchBar() {
             if (e.key === 'Enter' && results[0]) pick(results[0]);
             if (e.key === 'Escape') setOpen(false);
           }}
-          placeholder="Search RV 403 or TN-TRY-SCE-RV-F04-R403..."
-          className="bg-transparent outline-none text-xs text-slate-100 placeholder:text-slate-500 w-full"
+          placeholder="Search by ULPIN, Survey Number or Property ID..."
+          className="bg-transparent outline-none text-xs text-cipher-text placeholder:text-cipher-muted w-full font-normal"
         />
         {query && (
-          <button onClick={() => setQuery('')} className="text-slate-500 hover:text-slate-200">
+          <button
+            onClick={() => setQuery('')}
+            className="text-cipher-muted hover:text-cipher-text p-0.5"
+            title="Clear search"
+          >
             <X size={13} />
           </button>
         )}
       </div>
 
-      {open && results.length > 0 && (
-        <div className="absolute top-full mt-1.5 w-full glass border border-vertex-border rounded-lg shadow-panel overflow-hidden z-40 fade-in">
-          {results.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => pick(room)}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-vertex-cyan/10 transition-colors text-left"
-            >
-              <div>
-                <div className="text-xs text-slate-100 font-medium">{room.name}</div>
-                <div className="text-[10px] text-slate-500 mono">{room.id}</div>
-              </div>
-              <span className="text-[10px] text-slate-500">{room.floorShortName}</span>
-            </button>
-          ))}
+      {open && query.trim().length > 0 && (
+        <div className="absolute top-full mt-1.5 w-full bg-white border border-cipher-border rounded-lg shadow-elevated overflow-hidden z-50 fade-in divide-y divide-cipher-border">
+          <div className="px-3 py-2 bg-slate-50 flex items-center justify-between text-[11px] font-semibold text-cipher-muted">
+            <span>Search Results ({results.length})</span>
+            <span className="text-[10px] text-slate-400">Press Enter to select</span>
+          </div>
+
+          {results.length > 0 ? (
+            results.map((room) => (
+              <button
+                key={room.id}
+                onClick={() => pick(room)}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-blue-50/60 transition-colors text-left group"
+              >
+                <div className="min-w-0 flex-1 mr-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-cipher-navy group-hover:text-cipher-govblue">
+                      {room.name}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-cipher-muted font-medium">
+                      {room.type}
+                    </span>
+                    {room.officialReference && (
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-cipher-success font-medium border border-emerald-200">
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-cipher-muted mono truncate mt-0.5">
+                    {room.id}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-right shrink-0">
+                  <span className="text-[11px] font-medium text-cipher-muted bg-slate-100 px-2 py-0.5 rounded">
+                    {room.floorShortName}
+                  </span>
+                  <ChevronRight size={14} className="text-slate-300 group-hover:text-cipher-govblue" />
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="p-5 text-center text-xs text-cipher-muted">
+              No cadastral units found matching <span className="font-semibold text-cipher-text">"{query}"</span>
+            </div>
+          )}
         </div>
       )}
 
       {open && (
-        <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
       )}
     </div>
   );
