@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers3 } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 
 /**
@@ -14,13 +14,14 @@ export default function ExplodedViewController({ className = '' }) {
   return (
     <button
       onClick={() => setExplodedView((v) => !v)}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
         explodedView
-          ? 'bg-vertex-cyan/20 border-vertex-cyan text-vertex-cyan shadow-glow'
-          : 'glass border-vertex-border text-slate-200 hover:border-vertex-cyan/50'
+          ? 'bg-cipher-govblue text-white border-cipher-govblue shadow-subtle'
+          : 'bg-white border-cipher-border text-cipher-navy hover:bg-slate-50 hover:border-slate-300 shadow-subtle'
       } ${className}`}
     >
-      <Layers3 size={13} /> {explodedView ? 'Exploded View: On' : 'Exploded View'}
+      <Layers size={13} className={explodedView ? 'text-white' : 'text-cipher-govblue'} />
+      {explodedView ? 'Exploded View: Active' : 'Exploded View'}
     </button>
   );
 }

@@ -40,29 +40,30 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
   }, [selectedRoom]);
 
   return (
-    <div style={{ height }} className="relative w-full rounded-xl overflow-hidden border border-vertex-border bg-[#040910]">
-      <Canvas shadows camera={{ fov: 42, near: 0.1, far: 500 }}>
-        <color attach="background" args={['#040910']} />
-        <fog attach="fog" args={['#040910', 60, 160]} />
-        <ambientLight intensity={0.55} />
+    <div style={{ height }} className="relative w-full rounded-xl overflow-hidden border border-cipher-border bg-[#EBF1F6] shadow-subtle">
+      <Canvas shadows camera={{ fov: 40, near: 0.1, far: 500, position: [55, 34, 55] }}>
+        <color attach="background" args={['#EEF3F8']} />
+        <fog attach="fog" args={['#EEF3F8', 80, 220]} />
+        <ambientLight intensity={0.75} />
         <directionalLight
-          position={[40, 60, 20]}
-          intensity={1.1}
+          position={[45, 70, 30]}
+          intensity={1.2}
           castShadow
-          shadow-mapSize={[1024, 1024]}
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0001}
         />
-        <pointLight position={[-20, 20, -20]} intensity={0.3} color="#22d3ee" />
+        <directionalLight position={[-30, 40, -30]} intensity={0.4} color="#94A3B8" />
 
         <Grid
           position={[24, -0.15, 0]}
-          args={[120, 120]}
+          args={[140, 140]}
           cellSize={4}
-          cellThickness={0.5}
-          cellColor="#123049"
+          cellThickness={0.6}
+          cellColor="#CBD5E1"
           sectionSize={20}
-          sectionThickness={1}
-          sectionColor="#1e4a6b"
-          fadeDistance={140}
+          sectionThickness={1.2}
+          sectionColor="#94A3B8"
+          fadeDistance={160}
           infiniteGrid
         />
 
@@ -91,8 +92,9 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
         <CameraController focusTarget={focusTarget} focusRequest={focusRequest} resetRequest={resetRequest} />
       </Canvas>
 
-      <div className="absolute bottom-3 left-3 glass rounded-lg px-3 py-1.5 text-[11px] text-slate-300 pointer-events-none">
-        Drag to orbit · Scroll to zoom · Click a room to select
+      <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs border border-cipher-border rounded-md px-3 py-1.5 text-[11px] font-medium text-cipher-muted shadow-subtle pointer-events-none flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-cipher-govblue" />
+        <span>Left Click: Orbit · Right Click: Pan · Scroll: Zoom · Click Room: Inspect</span>
       </div>
     </div>
   );

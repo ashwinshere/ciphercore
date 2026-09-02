@@ -26,13 +26,15 @@ function Layout() {
   const Page = PAGES[currentPage] || Dashboard;
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden grid-bg">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-cipher-bg text-cipher-text gis-grid-bg">
       <WelcomeModal />
       <Navbar />
       <div className="flex-1 flex overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-5">
-          <Page />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="max-w-7xl mx-auto h-full">
+            <Page />
+          </div>
         </main>
       </div>
     </div>

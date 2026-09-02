@@ -18,7 +18,7 @@ export function AppProvider({ children }) {
   const [timelineYear, setTimelineYear] = useState(TIMELINE_YEARS[TIMELINE_YEARS.length - 1]);
   const [focusRequest, setFocusRequest] = useState(0); // increments to trigger camera focus
   const [resetRequest, setResetRequest] = useState(0); // increments to trigger camera reset
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const resetCamera = useCallback(() => {
     setSelectedRoomId(null);

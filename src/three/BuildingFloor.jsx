@@ -46,36 +46,37 @@ export default function BuildingFloor({
       <mesh position={[slabCenterX, floor.elevation - 0.1, slabCenterZ]} receiveShadow>
         <boxGeometry args={[slabWidth, 0.2, slabDepth]} />
         <meshStandardMaterial
-          color="#0b1626"
+          color="#E2E8F0"
           transparent
-          opacity={isDimmed ? 0.15 : 0.55}
-          roughness={0.9}
+          opacity={isDimmed ? 0.2 : 0.85}
+          roughness={0.7}
         />
       </mesh>
 
       {/* Corridor strip */}
       <mesh position={[CORRIDOR.x + CORRIDOR.width / 2, floor.elevation - 0.04, CORRIDOR.y + CORRIDOR.depth / 2]}>
         <boxGeometry args={[CORRIDOR.width, 0.05, CORRIDOR.depth]} />
-        <meshStandardMaterial color="#14304a" transparent opacity={isDimmed ? 0.1 : 0.5} />
+        <meshStandardMaterial color="#CBD5E1" transparent opacity={isDimmed ? 0.2 : 0.7} />
       </mesh>
 
       {/* Staircase / core */}
       <mesh position={[STAIRCASE.x + STAIRCASE.width / 2, floor.elevation + 1, STAIRCASE.y + STAIRCASE.depth / 2]}>
         <boxGeometry args={[STAIRCASE.width, 2.4, STAIRCASE.depth]} />
         <meshStandardMaterial
-          color="#f59e0b"
+          color="#F59E0B"
           transparent
-          opacity={isDimmed ? 0.08 : 0.25}
+          opacity={isDimmed ? 0.1 : 0.35}
           wireframe={false}
         />
       </mesh>
       <Text
         position={[STAIRCASE.x + STAIRCASE.width / 2, floor.elevation + 2.4, STAIRCASE.y + STAIRCASE.depth / 2]}
         fontSize={0.9}
-        color="#f59e0b"
+        color="#B45309"
         anchorX="center"
         anchorY="middle"
-        fillOpacity={isDimmed ? 0.15 : 0.8}
+        fillOpacity={isDimmed ? 0.2 : 0.9}
+        fontWeight="bold"
       >
         CORE
       </Text>
@@ -84,11 +85,12 @@ export default function BuildingFloor({
       <Text
         position={[-4, floor.elevation + 1.2, 0]}
         fontSize={1.1}
-        color="#38bdf8"
+        color="#123B63"
         anchorX="right"
         anchorY="middle"
         rotation={[0, Math.PI / 2, 0]}
-        fillOpacity={isDimmed ? 0.2 : 0.9}
+        fillOpacity={isDimmed ? 0.25 : 0.95}
+        fontWeight="bold"
       >
         {floor.shortName.toUpperCase()}
       </Text>

@@ -1,20 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { Search, ArrowUpDown, Database } from 'lucide-react';
+import { Search, ArrowUpDown, Database, ShieldCheck, Download, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { calculateArea } from '../utils/geometry.js';
 
 const COLUMNS = [
-  { key: 'id', label: 'Property ID' },
-  { key: 'name', label: 'Room' },
-  { key: 'floorShortName', label: 'Floor' },
-  { key: 'type', label: 'Type' },
-  { key: 'area', label: 'Area (m²)' },
-  { key: 'elevation', label: 'Elevation (m)' },
-  { key: 'status', label: 'Status' },
+  { key: 'id', label: 'ULPIN Identifier' },
+  { key: 'name', label: 'Cadastral Unit' },
+  { key: 'floorShortName', label: 'Level' },
+  { key: 'type', label: 'Property Usage' },
+  { key: 'area', label: 'Parcel Area' },
+  { key: 'elevation', label: 'Elevation' },
+  { key: 'status', label: 'Cadastral Status' },
 ];
 
 export default function RegistryTable() {
-  const { allRooms, selectRoom } = useApp();
+  const { allRooms, selectRoom, buildingData } = useApp();
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState('id');
   const [sortAsc, setSortAsc] = useState(true);
@@ -23,7 +23,7 @@ export default function RegistryTable() {
     return allRooms.map((r) => ({
       ...r,
       area: calculateArea(r),
-      status: r.officialReference ? 'Referenced' : 'Prototype',
+      status: r.officialReference ? 'Verified' : 'Pilot Survey',
     }));
   }, [allRooms]);
 
@@ -56,64 +56,100 @@ export default function RegistryTable() {
   };
 
   return (
-    <div className="fade-in space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Database size={19} className="text-vertex-cyan" />
-          Property Registry
-        </h2>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass border border-vertex-border">
-          <Search size={13} className="text-slate-500" />
+    <div className="fade-in space-y-4 pb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-cipher-border">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
+              Official Ledger
+            </span>
+            <span className="text-xs text-cipher-muted">·</span>
+            <span className="text-xs text-cipher-muted font-medium">
+              {buildingData.building.name} ({buildingData.building.district})
+            </span>
+          </div>
+          <h1 className="text-xl font-extrabold text-cipher-navy tracking-tight flex items-center gap-2">
+            <Database size={20} className="text-cipher-govblue" />
+            ULPIN Property Registry
+          </h1>
+        </div>
+
+        {/* Filter Input */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-cipher-border shadow-subtle focus-within:border-cipher-govblue focus-within:ring-2 focus-within:ring-cipher-govblue/15 transition-all">
+          <Search size={14} className="text-cipher-muted" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter registry..."
-            className="bg-transparent outline-none text-xs text-slate-100 placeholder:text-slate-500 w-52"
+            placeholder="Filter records..."
+            className="bg-transparent outline-none text-xs text-cipher-text placeholder:text-cipher-muted w-48 sm:w-60"
           />
         </div>
       </div>
 
-      <div className="glass rounded-xl border border-vertex-border overflow-hidden">
+      {/* High-density Government Records Table */}
+      <div className="gov-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-vertex-border bg-white/5">
+              <tr className="bg-slate-50/90 border-b border-cipher-border text-cipher-muted uppercase tracking-wider font-semibold">
                 {COLUMNS.map((col) => (
                   <th
                     key={col.key}
                     onClick={() => toggleSort(col.key)}
-                    className="text-left px-4 py-3 font-semibold text-slate-400 uppercase tracking-wide cursor-pointer select-none hover:text-vertex-cyan whitespace-nowrap"
+                    className="px-4 py-3 cursor-pointer select-none hover:text-cipher-navy hover:bg-slate-100/70 transition-colors whitespace-nowrap"
                   >
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       {col.label}
-                      <ArrowUpDown size={10} className="opacity-50" />
+                      <ArrowUpDown size={11} className="opacity-40" />
                     </span>
                   </th>
                 ))}
+                <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-cipher-borderLight">
               {filtered.map((row) => (
                 <tr
                   key={row.id}
                   onClick={() => selectRoom(row.id, { navigate: true })}
-                  className="border-b border-vertex-border/50 hover:bg-vertex-cyan/5 cursor-pointer transition-colors"
+                  className="hover:bg-blue-50/50 cursor-pointer transition-colors group"
                 >
-                  <td className="px-4 py-2.5 mono text-vertex-cyan whitespace-nowrap">{row.id}</td>
-                  <td className="px-4 py-2.5 text-slate-100 font-medium whitespace-nowrap">{row.name}</td>
-                  <td className="px-4 py-2.5 text-slate-300 whitespace-nowrap">{row.floorShortName}</td>
-                  <td className="px-4 py-2.5 text-slate-300 whitespace-nowrap">{row.type}</td>
-                  <td className="px-4 py-2.5 text-slate-300 mono">{row.area}</td>
-                  <td className="px-4 py-2.5 text-slate-300 mono">{row.elevation.toFixed(1)}</td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-3 mono font-semibold text-cipher-govblue whitespace-nowrap">
+                    {row.id}
+                  </td>
+                  <td className="px-4 py-3 font-bold text-cipher-navy whitespace-nowrap">
+                    {row.name}
+                  </td>
+                  <td className="px-4 py-3 text-cipher-text whitespace-nowrap">
+                    <span className="bg-slate-100 text-cipher-muted px-2 py-0.5 rounded text-[11px] font-medium">
+                      {row.floorShortName}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-cipher-text whitespace-nowrap">
+                    {row.type}
+                  </td>
+                  <td className="px-4 py-3 text-cipher-navy mono whitespace-nowrap font-medium">
+                    {row.area} m²
+                  </td>
+                  <td className="px-4 py-3 text-cipher-muted mono whitespace-nowrap">
+                    +{row.elevation.toFixed(1)} m
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                        row.status === 'Referenced'
-                          ? 'bg-vertex-ok/15 text-vertex-ok border-vertex-ok/30'
-                          : 'bg-vertex-warn/15 text-vertex-warn border-vertex-warn/30'
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        row.status === 'Verified'
+                          ? 'bg-emerald-50 text-cipher-success border-emerald-200'
+                          : 'bg-slate-100 text-cipher-muted border-slate-200'
                       }`}
                     >
+                      <ShieldCheck size={11} />
                       {row.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cipher-govblue group-hover:underline">
+                      Inspect <ChevronRight size={13} />
                     </span>
                   </td>
                 </tr>
@@ -121,13 +157,18 @@ export default function RegistryTable() {
             </tbody>
           </table>
         </div>
+
         {filtered.length === 0 && (
-          <div className="p-8 text-center text-slate-500 text-sm">No properties match "{query}".</div>
+          <div className="p-12 text-center text-cipher-muted text-sm">
+            No properties found matching <span className="font-semibold text-cipher-navy">"{query}"</span>.
+          </div>
         )}
+
+        <div className="px-4 py-2.5 bg-slate-50 border-t border-cipher-border flex items-center justify-between text-xs text-cipher-muted">
+          <span>Showing <strong className="text-cipher-navy font-semibold">{filtered.length}</strong> of {rows.length} indexed records</span>
+          <span className="text-[11px]">Click any row to open 3D property view</span>
+        </div>
       </div>
-      <p className="text-[11px] text-slate-500">
-        Showing {filtered.length} of {rows.length} properties.
-      </p>
     </div>
   );
 }
