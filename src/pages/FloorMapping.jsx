@@ -10,12 +10,38 @@ import { detectVerticalStack } from '../utils/verticalAnalysis.js';
 
 // ─── Room type colour scheme ───────────────────────────────────────────────────
 const ROOM_TYPE_COLORS = {
-  'Classroom':          { bg: '#DBEAFE', border: '#93C5FD', label: '#1D4ED8', text: '#1E40AF' },
-  'Common Laboratory':  { bg: '#EDE9FE', border: '#C4B5FD', label: '#7C3AED', text: '#5B21B6' },
-  'Tutorial Room':      { bg: '#D1FAE5', border: '#6EE7B7', label: '#059669', text: '#065F46' },
-  'Seminar Hall':       { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
+  // Academic
+  'Classroom':             { bg: '#DBEAFE', border: '#93C5FD', label: '#1D4ED8', text: '#1E40AF' },
+  'Common Laboratory':     { bg: '#EDE9FE', border: '#C4B5FD', label: '#7C3AED', text: '#5B21B6' },
+  'Tutorial Room':         { bg: '#D1FAE5', border: '#6EE7B7', label: '#059669', text: '#065F46' },
+  'Seminar Hall':          { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
   'Administrative Office': { bg: '#FEE2E2', border: '#FCA5A5', label: '#DC2626', text: '#991B1B' },
-  'Reception':          { bg: '#E0F2FE', border: '#7DD3FC', label: '#0284C7', text: '#075985' },
+  'Reception':             { bg: '#E0F2FE', border: '#7DD3FC', label: '#0284C7', text: '#075985' },
+  'Department Office':     { bg: '#FCE7F3', border: '#F472B6', label: '#DB2777', text: '#9D174D' },
+  'Faculty Lounge':        { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
+
+  // Hostel / Residential
+  'Warden Office':         { bg: '#FEE2E2', border: '#FCA5A5', label: '#DC2626', text: '#991B1B' },
+  'Student Lounge':        { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
+  'Recreation Room':       { bg: '#E0F2FE', border: '#7DD3FC', label: '#0284C7', text: '#075985' },
+  'Linen Store':           { bg: '#F1F5F9', border: '#CBD5E1', label: '#475569', text: '#1E293B' },
+  'Study Room':            { bg: '#D1FAE5', border: '#6EE7B7', label: '#059669', text: '#065F46' },
+  'Medical Room':          { bg: '#FFE4E6', border: '#FDA4AF', label: '#E11D48', text: '#9F1239' },
+  'Hostel Reception':      { bg: '#E0F2FE', border: '#7DD3FC', label: '#0284C7', text: '#075985' },
+  'Visitor Lounge':        { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
+  'Common Room':           { bg: '#ECFDF5', border: '#A7F3D0', label: '#059669', text: '#065F46' },
+  'Dormitory Room':        { bg: '#D1FAE5', border: '#6EE7B7', label: '#059669', text: '#065F46' },
+  'Double Occupancy Room': { bg: '#DBEAFE', border: '#93C5FD', label: '#1D4ED8', text: '#1E40AF' },
+  'Single Deluxe Room':    { bg: '#EDE9FE', border: '#C4B5FD', label: '#7C3AED', text: '#5B21B6' },
+  'Resident Suite':        { bg: '#FEF3C7', border: '#FCD34D', label: '#D97706', text: '#92400E' },
+  'Triple Sharing Room':   { bg: '#CCFBF1', border: '#5EEAD4', label: '#0D9488', text: '#115E59' },
+  'Resident Room':         { bg: '#D1FAE5', border: '#6EE7B7', label: '#059669', text: '#065F46' },
+
+  // Canteen / Parking / Sports / Mechanical
+  'Main Dining Hall':      { bg: '#FCE7F3', border: '#F472B6', label: '#DB2777', text: '#9D174D' },
+  'Kitchen & Food Prep':   { bg: '#FFEDD5', border: '#FDBA74', label: '#EA580C', text: '#9A3412' },
+  'Covered Vehicle Bay':   { bg: '#F1F5F9', border: '#CBD5E1', label: '#475569', text: '#1E293B' },
+  'Primary Play Court':    { bg: '#E0F2FE', border: '#7DD3FC', label: '#0284C7', text: '#075985' },
 };
 const DEFAULT_ROOM_COLOR = { bg: '#F1F5F9', border: '#94A3B8', label: '#475569', text: '#1E293B' };
 
@@ -254,18 +280,23 @@ function FloorPlanSVG({ floor, building, selectedRoomId, onSelectRoom, onHoverRo
 // ─── Compact Room Details Panel ────────────────────────────────────────────────
 function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
   const [copied, setCopied] = useState(false);
+  const bld = buildingData.building;
+
   if (!room) {
     return (
-      <div className="gov-card p-4 h-full flex flex-col items-center justify-center text-center gap-3">
-        <Layers size={28} className="text-slate-300" />
-        <p className="text-xs text-cipher-muted max-w-[160px]">
-          Click any room on the floor plan to see its ULPIN and cadastral details.
+      <aside className="gov-card p-4 h-full flex flex-col items-center justify-center text-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-cipher-govblue mb-1">
+          <Layers size={24} />
+        </div>
+        <h3 className="text-sm font-extrabold text-cipher-navy">No Unit Selected</h3>
+        <p className="text-xs text-cipher-muted max-w-[210px] leading-relaxed">
+          Touch or click any unit block on the floor plan layout to inspect its exact 3D ULPIN and cadastral record.
         </p>
-      </div>
+      </aside>
     );
   }
 
-  const ulpin3D = generate3DULPIN(buildingData.building, room.floorId, room.number);
+  const ulpin3D = room.ulpin3D || generate3DULPIN(bld, room.floorId, room.number);
   const area = calculateArea(room);
   const { above, below, stack } = detectVerticalStack(room, allRooms);
   const col = getRoomColor(room.type);
@@ -282,30 +313,28 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
       <div className="flex items-start justify-between pb-2.5 border-b border-cipher-border">
         <div>
           <div className="text-[10px] uppercase font-bold tracking-wider text-cipher-govblue">
-            Cadastral Property Record
+            Cadastral Unit Record
           </div>
           <h2 className="text-base font-extrabold text-cipher-navy mt-0.5">{room.name}</h2>
-          <span
-            className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold border"
-            style={{ backgroundColor: col.bg, borderColor: col.border, color: col.text }}
-          >
-            {room.type}
-          </span>
+          <div className="text-xs text-cipher-muted font-medium mt-0.5">
+            Building: <strong className="text-cipher-navy">{room.buildingName || bld.name}</strong>
+          </div>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-cipher-text p-1 rounded hover:bg-slate-100 transition-colors"
+          className="text-slate-400 hover:text-cipher-text p-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
+          title="Deselect unit"
         >
           <X size={15} />
         </button>
       </div>
 
-      {/* ULPIN identifier */}
+      {/* 3D ULPIN identifier */}
       <div className="p-3 rounded-lg bg-slate-50 border border-cipher-border">
         <div className="flex items-center justify-between text-[10px] text-cipher-muted uppercase font-semibold mb-1">
-          <span>ULPIN Identifier</span>
+          <span>3D ULPIN Identifier</span>
           <span className="flex items-center gap-1 text-cipher-success font-medium normal-case">
-            <CheckCircle2 size={10} /> Verified
+            <CheckCircle2 size={10} /> Verified Record
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -314,8 +343,8 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
           </span>
           <button
             onClick={handleCopy}
-            className="shrink-0 p-1.5 rounded hover:bg-white border border-transparent hover:border-cipher-border text-cipher-muted hover:text-cipher-navy transition-all"
-            title="Copy ULPIN"
+            className="shrink-0 p-1.5 rounded hover:bg-white border border-transparent hover:border-cipher-border text-cipher-muted hover:text-cipher-navy transition-all cursor-pointer"
+            title="Copy 3D ULPIN"
           >
             {copied ? <Check size={13} className="text-cipher-success" /> : <Copy size={13} />}
           </button>
@@ -325,22 +354,50 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
       {/* Metadata grid */}
       <div>
         <div className="text-[10px] font-bold text-cipher-navy uppercase tracking-wide mb-1.5">
-          Spatial & Cadastral Metadata
+          Spatial &amp; Cadastral Metadata
         </div>
         <div className="grid grid-cols-2 gap-1.5 text-xs">
-          {[
-            ['SURVEY NO', `${room.name.replace('-', '')}/2A`],
-            ['PROPERTY TYPE', room.type],
-            ['PARCEL AREA', `${area} m²`],
-            ['VERTICAL LEVEL', `+${room.elevation.toFixed(1)} m (${room.floorShortName})`],
-            ['DISTRICT/TALUK', buildingData.building.district],
-            ['CADASTRE STATUS', 'Verified Record'],
-          ].map(([k, v]) => (
-            <div key={k} className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
-              <div className="text-[9px] text-cipher-muted font-semibold">{k}</div>
-              <div className="font-semibold text-cipher-navy mt-0.5 text-[11px] leading-tight">{v}</div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">ROOM / UNIT NAME</div>
+            <div className="font-bold text-cipher-navy mt-0.5 text-[11px] leading-tight">{room.name}</div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">BLOCK NUMBER</div>
+            <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px] leading-tight">
+              {room.blockNumber || bld.blockNumber || 'Block 104'}
             </div>
-          ))}
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight col-span-2">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">OWNER / AUTHORITY</div>
+            <div className="font-bold text-cipher-navy mt-0.5 text-[11px] leading-tight truncate">
+              {room.ownerName || bld.ownerName || 'Saranathan Educational Trust'}
+            </div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">SURVEY NO</div>
+            <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px] leading-tight">
+              {room.surveyNumber || `${room.name.replace('-', '')}/2A`}
+            </div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">PROPERTY TYPE</div>
+            <div className="font-bold text-cipher-navy mt-0.5 text-[11px] leading-tight truncate">{room.type}</div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">UNIT AREA</div>
+            <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px] leading-tight">{area} m²</div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">VERTICAL LEVEL</div>
+            <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px] leading-tight">+{room.elevation.toFixed(1)}m ({room.floorShortName})</div>
+          </div>
+          <div className="p-2 rounded-lg bg-cipher-bg border border-cipher-borderLight col-span-2">
+            <div className="text-[9px] text-cipher-muted font-semibold uppercase">CADASTRE STATUS</div>
+            <div className="font-bold text-emerald-700 mt-0.5 text-[11px] leading-tight flex items-center gap-1">
+              <ShieldCheck size={12} className="text-emerald-600 shrink-0" />
+              Verified 3D Unit Record
+            </div>
+          </div>
         </div>
       </div>
 
@@ -352,10 +409,10 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
         </div>
         <div className="p-2.5 rounded-lg bg-cipher-bg border border-cipher-border font-mono text-[10px] space-y-1 text-cipher-muted">
           <div className="flex items-center gap-1 text-cipher-navy font-semibold">
-            <span className="text-slate-400">LAND</span> TN-TRY-SCE-001
+            <span className="text-slate-400">LAND</span> {room.ulpin2D || bld.ulpin2D}
           </div>
           <div className="flex items-center gap-1 pl-3 border-l-2 border-slate-200">
-            <span className="text-slate-400">└── BLDG</span> {buildingData.building.name}
+            <span className="text-slate-400">└── BLDG</span> {room.buildingName || bld.name}
           </div>
           <div className="flex items-center gap-1 pl-6 border-l-2 border-slate-200 text-cipher-govblue">
             <span className="text-slate-400">└── FLOOR</span> {room.floorName}
@@ -367,23 +424,30 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
 
         {/* Above/Below navigation */}
         <div className="grid grid-cols-2 gap-1.5 mt-2">
-          {[
-            { unit: above, dir: 'Above', Icon: ArrowUp },
-            { unit: below, dir: 'Below', Icon: ArrowDown },
-          ].map(({ unit, dir, Icon }) => (
-            <button
-              key={dir}
-              disabled={!unit}
-              className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white border border-cipher-border hover:border-cipher-govblue disabled:opacity-40 text-left transition-colors text-xs"
-            >
-              <span className="flex items-center gap-1 text-cipher-muted text-[11px]">
-                <Icon size={11} className="text-cipher-govblue" />{dir}
-              </span>
-              <span className="font-semibold text-cipher-navy mono text-[10px] truncate ml-1">
-                {unit ? unit.name : '—'}
-              </span>
-            </button>
-          ))}
+          <button
+            onClick={() => above && selectRoom(above.id, { focus: false })}
+            disabled={!above}
+            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white border border-cipher-border hover:border-cipher-govblue disabled:opacity-40 text-left transition-colors text-xs cursor-pointer"
+          >
+            <span className="flex items-center gap-1 text-cipher-muted text-[11px]">
+              <ArrowUp size={11} className="text-cipher-govblue" /> Above
+            </span>
+            <span className="font-semibold text-cipher-navy mono text-[10px] truncate ml-1">
+              {above ? above.name : '—'}
+            </span>
+          </button>
+          <button
+            onClick={() => below && selectRoom(below.id, { focus: false })}
+            disabled={!below}
+            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white border border-cipher-border hover:border-cipher-govblue disabled:opacity-40 text-left transition-colors text-xs cursor-pointer"
+          >
+            <span className="flex items-center gap-1 text-cipher-muted text-[11px]">
+              <ArrowDown size={11} className="text-cipher-govblue" /> Below
+            </span>
+            <span className="font-semibold text-cipher-navy mono text-[10px] truncate ml-1">
+              {below ? below.name : '—'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -392,7 +456,7 @@ function RoomDetailsPanel({ room, buildingData, allRooms, onClose }) {
         <div className="flex items-center gap-1.5">
           <Lock size={12} className="text-cipher-govblue" />
           <span className="text-cipher-muted text-[10px]">Record Integrity:</span>
-          <span className="font-semibold text-cipher-success text-[10px]">✓ Validated</span>
+          <span className="font-semibold text-cipher-success text-[10px]">✓ Validated 3D Record</span>
         </div>
         <span className="text-[9px] text-cipher-muted mono">Audit: 2026</span>
       </div>

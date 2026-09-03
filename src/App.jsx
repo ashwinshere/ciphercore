@@ -12,6 +12,7 @@ import VerticalAnalysis from './pages/VerticalAnalysis.jsx';
 import ConflictDetection from './pages/ConflictDetection.jsx';
 import Registry from './pages/Registry.jsx';
 import Timeline from './pages/Timeline.jsx';
+import SatelliteView from './pages/SatelliteView.jsx';
 
 const PAGES = {
   dashboard: Dashboard,
@@ -21,6 +22,7 @@ const PAGES = {
   'conflict-detection': ConflictDetection,
   registry: Registry,
   timeline: Timeline,
+  'satellite-view': SatelliteView,
 };
 
 function Layout() {

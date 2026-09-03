@@ -34,12 +34,10 @@ export default function CameraController({ building, focusTarget, focusRequest, 
     animTarget.current = { pos: defaultPosition.clone(), look: defaultTarget.clone() };
   }, [resetRequest, defaultPosition, defaultTarget]);
 
+  // Automatic camera zooming on room selection is disabled to prevent unwanted over-zooming.
+  // The user maintains full manual control over zoom, pan, and rotation via OrbitControls.
   useEffect(() => {
-    if (!focusTarget) return;
-    const look = new THREE.Vector3(focusTarget.x, focusTarget.y, focusTarget.z);
-    const dir = new THREE.Vector3(1, 0.65, 1).normalize();
-    const pos = look.clone().add(dir.multiplyScalar(18));
-    animTarget.current = { pos, look };
+    // Only reset camera position when resetRequest is triggered
   }, [focusRequest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useFrame(() => {

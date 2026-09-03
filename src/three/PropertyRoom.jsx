@@ -14,6 +14,31 @@ const TYPE_COLORS = {
   'Store Room': '#64748B',
   'Waiting Area': '#10B981',
   'Records Room': '#475569',
+
+  // Hostel / Residential
+  'Warden Office': '#DC2626',
+  'Student Lounge': '#D97706',
+  'Recreation Room': '#0284C7',
+  'Linen Store': '#64748B',
+  'Study Room': '#059669',
+  'Medical Room': '#E11D48',
+  'Hostel Reception': '#0284C7',
+  'Visitor Lounge': '#D97706',
+  'Common Room': '#059669',
+  'Dormitory Room': '#10B981',
+  'Double Occupancy Room': '#2563EB',
+  'Single Deluxe Room': '#7C3AED',
+  'Resident Suite': '#D97706',
+  'Triple Sharing Room': '#0D9488',
+  'Resident Room': '#10B981',
+
+  // Canteen / Parking / Sports / Mechanical
+  'Main Dining Hall': '#DB2777',
+  'Kitchen & Food Prep': '#EA580C',
+  'Covered Vehicle Bay': '#64748B',
+  'Primary Play Court': '#0284C7',
+  'Heavy Workshop': '#B45309',
+  'CAD/CAM Simulation Lab': '#4F46E5',
 };
 
 export default function PropertyRoom({
@@ -31,13 +56,15 @@ export default function PropertyRoom({
   const baseColor = TYPE_COLORS[room.type] || '#2563EB';
 
   const color = useMemo(() => {
-    if (isSelected) return '#1D4ED8';
+    if (isSelected) return '#F59E0B'; // Distinct Vibrant Amber-Gold Highlight
     if (isStackMember) return '#3B82F6';
-    if (isHovered) return '#60A5FA';
+    if (isHovered) return '#FBBF24'; // Bright Amber Hover
     return baseColor;
   }, [isSelected, isStackMember, isHovered, baseColor]);
 
-  const opacity = dimmed ? 0.1 : isSelected ? 0.9 : isStackMember ? 0.75 : 0.55;
+  const opacity = dimmed ? 0.08 : (isSelected ? 0.98 : (isStackMember ? 0.75 : 0.55));
+  const emissive = isSelected ? '#F59E0B' : (isHovered ? '#D97706' : '#000000');
+  const emissiveIntensity = isSelected ? 0.55 : (isHovered ? 0.2 : 0);
 
   const centerX = room.x + room.width / 2;
   const centerZ = room.y + room.depth / 2;
@@ -45,7 +72,7 @@ export default function PropertyRoom({
 
   useFrame(() => {
     if (!meshRef.current) return;
-    const targetScale = isSelected ? 1.03 : 1;
+    const targetScale = isSelected ? 1.05 : 1;
     meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
   });
 
@@ -53,6 +80,10 @@ export default function PropertyRoom({
     <group position={[centerX, centerY, centerZ]}>
       <mesh
         ref={meshRef}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          onSelect?.(room);
+        }}
         onClick={(e) => {
           e.stopPropagation();
           onSelect?.(room);
@@ -71,15 +102,17 @@ export default function PropertyRoom({
         <boxGeometry args={[room.width, room.height, room.depth]} />
         <meshStandardMaterial
           color={color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
           transparent
           opacity={opacity}
-          roughness={0.3}
-          metalness={0.1}
+          roughness={isSelected ? 0.1 : 0.3}
+          metalness={isSelected ? 0.3 : 0.1}
         />
         <Edges
-          scale={1.001}
+          scale={1.003}
           threshold={15}
-          color={isSelected ? '#FFFFFF' : isStackMember ? '#BFDBFE' : '#1E293B'}
+          color={isSelected ? '#FFFFFF' : (isStackMember ? '#BFDBFE' : '#1E293B')}
         />
       </mesh>
 

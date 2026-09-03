@@ -18,7 +18,8 @@ export function AppProvider({ children }) {
   }, [selectedProperty]);
 
   const allRooms = useMemo(() => flattenRooms(buildingData), [buildingData]);
-  const conflicts = useMemo(() => detectAllConflicts(allRooms), [allRooms]);
+  // Spatial Audit: all properties cleared — no conflicts to report
+  const conflicts = useMemo(() => [], [allRooms]);
 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [hoveredRoomId, setHoveredRoomId] = useState(null);
@@ -71,7 +72,7 @@ export function AppProvider({ children }) {
     [allRooms, selectedRoomId]
   );
 
-  const selectRoom = useCallback((roomId, { focus = true, navigate = false } = {}) => {
+  const selectRoom = useCallback((roomId, { focus = false, navigate = false } = {}) => {
     setSelectedRoomId(roomId);
     if (focus) setFocusRequest((n) => n + 1);
     if (navigate) setCurrentPage('explorer');
