@@ -9,12 +9,14 @@ import {
   Database,
   History,
   Building2,
+  Satellite,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Land & Property Overview', icon: LayoutDashboard },
   { id: 'gis-explorer', label: 'GIS Explorer', icon: Globe, highlight: true },
+  { id: 'satellite-view', label: 'Satellite View', icon: Satellite },
   { id: 'explorer', label: '3D Building Explorer', icon: Box },
   { id: 'floor-mapping', label: 'Building & Floor Plans', icon: Layers },
   { id: 'vertical-analysis', label: 'Vertical Stack Structure', icon: ArrowUpDown },
@@ -85,10 +87,16 @@ export default function Sidebar() {
                 </span>
               )}
 
-              {item.id === 'conflict-detection' && conflictCount > 0 && (
-                <span className="text-[10px] font-bold bg-amber-50 text-cipher-warning border border-amber-200 px-1.5 py-0.5 rounded-full">
-                  {conflictCount}
-                </span>
+              {item.id === 'conflict-detection' && (
+                conflictCount > 0 ? (
+                  <span className="text-[10px] font-bold bg-amber-50 text-cipher-warning border border-amber-200 px-1.5 py-0.5 rounded-full">
+                    {conflictCount}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                    ✓
+                  </span>
+                )
               )}
             </button>
           );

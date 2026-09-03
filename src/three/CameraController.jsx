@@ -68,9 +68,9 @@ export default function CameraController({ building, focusTarget, focusRequest, 
     if (!focusTarget) return;
     const look = new THREE.Vector3(focusTarget.x, focusTarget.y, focusTarget.z);
     const dir = new THREE.Vector3(1, 0.65, 1).normalize();
-    const pos = look.clone().add(dir.multiplyScalar(20));
+    const pos = look.clone().add(dir.multiplyScalar(22));
     animTarget.current = { pos, look };
-  }, [focusRequest]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [focusRequest, focusTarget]);
 
   useFrame(() => {
     if (!controlsRef.current) return;

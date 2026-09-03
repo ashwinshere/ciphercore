@@ -68,6 +68,97 @@ const TYPE_CONFIG = {
     glow: '#22D3EE',
     border: '#0891B2',
     tag: 'bg-cyan-600 text-white'
+  },
+  'Department Office': {
+    color: '#EC4899',
+    glass: '#FBCFE8',
+    glow: '#F472B6',
+    border: '#DB2777',
+    tag: 'bg-pink-600 text-white'
+  },
+  'Warden Office': {
+    color: '#EF4444',
+    glass: '#FECACA',
+    glow: '#F87171',
+    border: '#DC2626',
+    tag: 'bg-red-600 text-white'
+  },
+  'Student Lounge': {
+    color: '#F59E0B',
+    glass: '#FDE68A',
+    glow: '#FBBF24',
+    border: '#D97706',
+    tag: 'bg-amber-600 text-white'
+  },
+  'Recreation Room': {
+    color: '#0284C7',
+    glass: '#BAE6FD',
+    glow: '#38BDF8',
+    border: '#0369A1',
+    tag: 'bg-sky-600 text-white'
+  },
+  'Study Room': {
+    color: '#10B981',
+    glass: '#A7F3D0',
+    glow: '#34D399',
+    border: '#059669',
+    tag: 'bg-emerald-600 text-white'
+  },
+  'Medical Room': {
+    color: '#F43F5E',
+    glass: '#FECDD3',
+    glow: '#FB7185',
+    border: '#E11D48',
+    tag: 'bg-rose-600 text-white'
+  },
+  'Dormitory Room': {
+    color: '#10B981',
+    glass: '#A7F3D0',
+    glow: '#34D399',
+    border: '#059669',
+    tag: 'bg-emerald-600 text-white'
+  },
+  'Double Occupancy Room': {
+    color: '#3B82F6',
+    glass: '#93C5FD',
+    glow: '#60A5FA',
+    border: '#2563EB',
+    tag: 'bg-blue-600 text-white'
+  },
+  'Single Deluxe Room': {
+    color: '#8B5CF6',
+    glass: '#DDD6FE',
+    glow: '#A78BFA',
+    border: '#7C3AED',
+    tag: 'bg-purple-600 text-white'
+  },
+  'Triple Sharing Room': {
+    color: '#14B8A6',
+    glass: '#99F6E4',
+    glow: '#2DD4BF',
+    border: '#0D9488',
+    tag: 'bg-teal-600 text-white'
+  },
+  'Resident Room': {
+    color: '#10B981',
+    glass: '#A7F3D0',
+    glow: '#34D399',
+    border: '#059669',
+    tag: 'bg-emerald-600 text-white'
+  },
+  'Main Dining Hall': {
+    color: '#EC4899',
+    glass: '#FBCFE8',
+    glow: '#F472B6',
+    border: '#DB2777',
+    tag: 'bg-pink-600 text-white'
+  },
+  'Kitchen & Food Prep': {
+    color: '#F97316',
+    glass: '#FED7AA',
+    glow: '#FB923C',
+    border: '#EA580C',
+    tag: 'bg-orange-600 text-white'
   }
 };
 
@@ -141,12 +232,12 @@ export default function PropertyRoom({
         onPointerDown={handleSelect}
         onPointerOver={(e) => {
           e.stopPropagation();
-          onHover?.(room);
+          if (onHover) onHover(room);
           document.body.style.cursor = 'pointer';
         }}
         onPointerOut={(e) => {
           e.stopPropagation();
-          onUnhover?.(room);
+          if (onUnhover) onUnhover(room);
           document.body.style.cursor = 'auto';
         }}
         receiveShadow

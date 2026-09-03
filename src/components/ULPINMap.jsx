@@ -61,7 +61,7 @@ const SVG_W = 900;
 const SVG_H = 640;
 
 // ─── Individual Parcel Polygon ────────────────────────────────────────────────
-function CadastralParcel({ property, project, isSelected, onHover, onLeave, onClick }) {
+function CadastralParcel({ property, project, isSelected, onHover, onLeave, onClick, onDoubleClick }) {
   const [hovered, setHovered] = useState(false);
   const pts = property.footprint.map(project);
   const pointsStr = pts.map(([x, y]) => `${x},${y}`).join(' ');
@@ -73,21 +73,35 @@ function CadastralParcel({ property, project, isSelected, onHover, onLeave, onCl
   const handleMouseEnter = () => { setHovered(true); onHover(property, cx, cy); };
   const handleMouseLeave = () => { setHovered(false); onLeave(); };
 
+  // Distinct vibrant selected highlight color vs subtle unselected / hover fill
+  const fillColor = isSelected ? '#F59E0B' : col.fill;
+  const strokeColor = isSelected ? '#B45309' : col.stroke;
+  const fillOpacity = isSelected ? 0.92 : (hovered ? 0.60 : 0.28);
+  const strokeWidth = isSelected ? 4 : (hovered ? 2.5 : 1.5);
+  const textColor = isSelected ? '#FFFFFF' : col.label;
+
   return (
     <g
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={() => onClick(property)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(property);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onDoubleClick?.(property);
+      }}
       style={{ cursor: 'pointer' }}
     >
-      {/* Shadow/glow when selected or hovered */}
-      {(hovered || isSelected) && (
+      {/* Outer selection / hover glow ring */}
+      {(isSelected || hovered) && (
         <polygon
           points={pointsStr}
           fill="none"
-          stroke={col.stroke}
-          strokeWidth={hovered ? 6 : 4}
-          strokeOpacity={0.25}
+          stroke={isSelected ? '#F59E0B' : strokeColor}
+          strokeWidth={isSelected ? 10 : 5}
+          strokeOpacity={isSelected ? 0.65 : 0.25}
           strokeLinejoin="round"
         />
       )}
@@ -95,36 +109,44 @@ function CadastralParcel({ property, project, isSelected, onHover, onLeave, onCl
       {/* Main parcel polygon */}
       <polygon
         points={pointsStr}
-        fill={col.fill}
-        fillOpacity={hovered ? 0.45 : isSelected ? 0.35 : 0.22}
-        stroke={col.stroke}
-        strokeWidth={hovered ? 2.5 : isSelected ? 2 : 1.5}
+        fill={fillColor}
+        fillOpacity={fillOpacity}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
         strokeLinejoin="round"
-        style={{ transition: 'fill-opacity 0.15s, stroke-width 0.15s' }}
+        style={{ transition: 'fill 0.15s, fill-opacity 0.15s, stroke-width 0.15s' }}
       />
 
-      {/* Parcel hatch pattern lines for depth */}
+      {/* Selected Hatch Pattern Overlay for depth */}
       {isSelected && (
         <polygon
           points={pointsStr}
           fill={`url(#hatch-${property.id})`}
-          fillOpacity={0.3}
+          fillOpacity={0.4}
           stroke="none"
           pointerEvents="none"
         />
       )}
 
+      {/* Selected Indicator Pin Badge */}
+      {isSelected && (
+        <g transform={`translate(${cx}, ${cy - 20})`}>
+          <circle cx="0" cy="0" r="5" fill="#FFFFFF" stroke="#B45309" strokeWidth="2" />
+          <circle cx="0" cy="0" r="2" fill="#B45309" />
+        </g>
+      )}
+
       {/* Block number label */}
       <text
         x={cx}
-        y={cy - 7}
+        y={cy - 4}
         textAnchor="middle"
-        fontSize="13"
-        fontWeight="800"
-        fill={col.label}
+        fontSize="13.5"
+        fontWeight="900"
+        fill={textColor}
         fontFamily="'Inter', system-ui, sans-serif"
         pointerEvents="none"
-        style={{ userSelect: 'none' }}
+        style={{ userSelect: 'none', filter: isSelected ? 'drop-shadow(0px 1px 3px rgba(0,0,0,0.85))' : 'none' }}
       >
         {blockNo}
       </text>
@@ -132,15 +154,15 @@ function CadastralParcel({ property, project, isSelected, onHover, onLeave, onCl
       {/* Short building name label */}
       <text
         x={cx}
-        y={cy + 8}
+        y={cy + 12}
         textAnchor="middle"
-        fontSize="9.5"
-        fontWeight="600"
-        fill={col.label}
-        fillOpacity={0.85}
+        fontSize="10"
+        fontWeight="800"
+        fill={textColor}
+        fillOpacity={isSelected ? 1 : 0.9}
         fontFamily="'Inter', system-ui, sans-serif"
         pointerEvents="none"
-        style={{ userSelect: 'none' }}
+        style={{ userSelect: 'none', filter: isSelected ? 'drop-shadow(0px 1px 3px rgba(0,0,0,0.85))' : 'none' }}
       >
         {property.name}
       </text>
@@ -203,7 +225,7 @@ function ParcelTooltip({ property, svgX, svgY, containerRef }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function ULPINMap() {
-  const { selectedProperty, selectProperty, enter3DView } = useApp();
+  const { selectedProperty, selectPropertyOnMap, enter3DView } = useApp();
 
   const [hoveredProp, setHoveredProp] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
@@ -226,10 +248,12 @@ export default function ULPINMap() {
   const handleParcelLeave = useCallback(() => setHoveredProp(null), []);
 
   const handleParcelClick = useCallback((prop) => {
-    selectProperty(prop);
-    // Slight delay for visual feedback, then open 3D
-    setTimeout(() => enter3DView(prop), 180);
-  }, [selectProperty, enter3DView]);
+    selectPropertyOnMap(prop);
+  }, [selectPropertyOnMap]);
+
+  const handleParcelDoubleClick = useCallback((prop) => {
+    enter3DView(prop);
+  }, [enter3DView]);
 
   // Pan handlers
   const onMouseDown = (e) => {
@@ -501,6 +525,7 @@ export default function ULPINMap() {
               onHover={handleParcelHover}
               onLeave={handleParcelLeave}
               onClick={handleParcelClick}
+              onDoubleClick={handleParcelDoubleClick}
             />
           ))}
 

@@ -37,7 +37,7 @@ export function flattenRooms(buildingData) {
     floor.rooms.forEach((room) => {
       flat.push({
         ...room,
-        id: generateVerticalPropertyId(floor, room, buildingPrefix),
+        id: room.id || generateVerticalPropertyId(floor, room, buildingPrefix),
         floorId: floor.id,
         floorNumId: floor.numId,
         floorName: floor.name,
