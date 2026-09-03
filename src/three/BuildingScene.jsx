@@ -7,8 +7,6 @@ import { useApp } from '../context/AppContext.jsx';
 import { detectVerticalStack } from '../utils/verticalAnalysis.js';
 import { roomCenter } from '../utils/geometry.js';
 
-const EXPLODE_GAP = 7; // spacing per floor when exploded
-
 export default function BuildingScene({ isolateOverride, height = '100%', showStackOnly = false }) {
   const {
     buildingData,
@@ -19,6 +17,7 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
     setHoveredRoomId,
     selectRoom,
     explodedView,
+    explodeDistance = 7,
     isolatedFloorId,
     visibleFloorIds,
     focusRequest,
@@ -44,25 +43,45 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
   const depth = building.footprintDepthM || 20;
 
   return (
-    <div style={{ height }} className="relative w-full rounded-xl overflow-hidden border border-cipher-border bg-[#F1F5F9] shadow-subtle">
-      <Canvas shadows camera={{ fov: 38, near: 0.1, far: 600, position: [60, 40, 60] }}>
-        <color attach="background" args={['#F1F5F9']} />
-        <fog attach="fog" args={['#F1F5F9', 90, 280]} />
-        <ambientLight intensity={0.85} />
+    <div style={{ height }} className="relative w-full rounded-2xl overflow-hidden border border-cipher-border bg-[#F8FAFC] shadow-sm">
+      <Canvas shadows camera={{ fov: 36, near: 0.1, far: 800, position: [65, 45, 65] }}>
+        {/* Crisp Modern Architectural Light Theme */}
+        <color attach="background" args={['#F8FAFC']} />
+        <fog attach="fog" args={['#F8FAFC', 120, 360]} />
+
+        {/* Ambient & Sky Lighting */}
+        <ambientLight intensity={0.9} />
+        <hemisphereLight skyColor="#E0F2FE" groundColor="#F1F5F9" intensity={0.7} />
+
+        {/* Warm Sunlight casting soft contact shadows */}
         <directionalLight
-          position={[60, 80, 40]}
-          intensity={1.2}
+          position={[60, 90, 45]}
+          intensity={1.4}
+          color="#FFFDF5"
           castShadow
           shadow-mapSize={[2048, 2048]}
+          shadow-camera-near={10}
+          shadow-camera-far={250}
+          shadow-camera-left={-60}
+          shadow-camera-right={60}
+          shadow-camera-top={60}
+          shadow-camera-bottom={-60}
+          shadow-bias={-0.0001}
         />
-        <directionalLight position={[-40, 50, -40]} intensity={0.4} color="#94A3B8" />
+        <directionalLight position={[-50, 40, -50]} intensity={0.5} color="#BAE6FD" />
 
-        {/* Clean Minimalist Cadastral Ground Grid */}
+        {/* Architectural Ground Plane & Shadow Receiver */}
+        <mesh position={[0, -0.22, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[500, 500]} />
+          <shadowMaterial opacity={0.15} />
+        </mesh>
+
+        {/* Clean Minimalist Cadastral Grid */}
         <Grid
           position={[0, -0.2, 0]}
-          args={[Math.max(width * 2.5, 120), Math.max(depth * 2.5, 120)]}
-          cellSize={4}
-          cellThickness={0.6}
+          args={[Math.max(width * 2.5, 140), Math.max(depth * 2.5, 140)]}
+          cellSize={5}
+          cellThickness={0.7}
           cellColor="#CBD5E1"
           sectionSize={20}
           sectionThickness={1.2}
@@ -76,11 +95,11 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
           {buildingData.floors.map((floor, idx) => {
             const isVisible = visibleFloorIds.includes(floor.id);
             const isIsolated = activeIsolatedFloor && activeIsolatedFloor !== floor.id;
-            const explodedOffset = explodedView ? idx * EXPLODE_GAP : 0;
+            const explodedOffset = explodedView ? idx * explodeDistance : 0;
             return (
               <BuildingFloor
                 key={floor.id}
-                floor={floor}
+                floor={{ ...floor, isTop: idx === buildingData.floors.length - 1 }}
                 building={building}
                 explodedOffset={explodedOffset}
                 isDimmed={isIsolated}
@@ -105,9 +124,10 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
         />
       </Canvas>
 
-      <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-xs border border-cipher-border rounded-md px-3 py-1.5 text-[11px] font-medium text-cipher-navy shadow-subtle pointer-events-none flex items-center gap-2 z-10">
+      {/* Interactive Helper Overlay Bar */}
+      <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md border border-cipher-border rounded-lg px-3 py-1.5 text-[11px] font-medium text-cipher-navy shadow-subtle pointer-events-none flex items-center gap-2 z-10">
         <span className="w-2 h-2 rounded-full bg-cipher-govblue animate-pulse" />
-        <span>Left Click: Orbit · Right Click: Pan · Scroll: Zoom · Click Unit: Inspect 3D ULPIN</span>
+        <span>Click Unit: Focus &amp; Inspect 3D ULPIN · Left Click: Orbit · Right Click: Pan · Scroll: Zoom</span>
       </div>
     </div>
   );
