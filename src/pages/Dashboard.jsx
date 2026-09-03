@@ -151,55 +151,6 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Professional GIS + 3D Architecture Workflow Diagram */}
-      <div className="gov-card p-5 bg-gradient-to-r from-slate-900 via-cipher-navy to-slate-900 text-white shadow-card rounded-2xl overflow-hidden relative">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/15">
-          <div>
-            <div className="flex items-center gap-2 text-cyan-300 text-[11px] font-mono uppercase tracking-wider font-bold mb-1">
-              <Compass size={14} className="animate-spin-slow" />
-              <span>VERTEX GIS ➔ 3D SPATIAL ARCHITECTURE</span>
-            </div>
-            <h2 className="text-lg font-extrabold tracking-tight text-white">
-              From Global Coordinates to Vertical Sub-Parcels
-            </h2>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/20 text-center text-xs font-semibold text-cyan-200 max-w-md">
-            “GIS tells us where the building exists on Earth.<br />
-            <span className="text-white font-bold">VERTEX tells us where every property exists inside the building.”</span>
-          </div>
-        </div>
-
-        {/* Interactive Architecture Flow Nodes */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-4">
-          {[
-            { step: '01', title: 'OpenStreetMap', sub: 'WGS84 Tiles (EPSG:4326)', icon: Globe, highlight: '#38BDF8' },
-            { step: '02', title: 'GIS Location', sub: 'Saranathan Campus', icon: MapPin, highlight: '#60A5FA' },
-            { step: '03', title: 'Building Anchor', sub: 'RV Block Geographic Lat/Lng', icon: Building2, highlight: '#F59E0B' },
-            { step: '04', title: '3D Digital Twin', sub: 'Procedural Floor Slabs', icon: Box, highlight: '#818CF8' },
-            { step: '05', title: 'Vertical Cadastre', sub: '3D ULPIN Indexing', icon: Layers, highlight: '#34D399' },
-            { step: '06', title: 'Spatial Intel', sub: 'QA Audit & Stack Graph', icon: Cpu, highlight: '#F472B6' },
-          ].map((node) => {
-            const Icon = node.icon;
-            return (
-              <div
-                key={node.step}
-                className="bg-white/5 hover:bg-white/10 transition-all border border-white/10 rounded-xl p-3 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[10px] font-bold text-white/50">{node.step}</span>
-                    <Icon size={14} style={{ color: node.highlight }} />
-                  </div>
-                  <div className="text-xs font-bold text-white">{node.title}</div>
-                </div>
-                <div className="text-[10px] text-slate-300 mt-2 pt-2 border-t border-white/10 truncate">
-                  {node.sub}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Central Spatial Visualizer (1fr) + Property Information Panel (360px) */}
       <div className="space-y-3">
