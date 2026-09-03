@@ -17,12 +17,14 @@ import {
   ChevronRight,
   Compass,
   Box,
-  Maximize
+  Maximize,
+  Globe
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { generate3DULPIN } from '../utils/ulpin.js';
 import { calculateArea } from '../utils/geometry.js';
 import { detectVerticalStack } from '../utils/verticalAnalysis.js';
+import { generatePrototypePropertyId, gisData } from '../data/gisData.js';
 
 export default function PropertyDetails() {
   const {
@@ -37,10 +39,10 @@ export default function PropertyDetails() {
   const [copiedField, setCopiedField] = useState(null);
 
   const bld = buildingData?.building || {};
-  const propertyName = selectedProperty ? selectedProperty.name : bld.name || 'Academic Block';
+  const propertyName = selectedProperty ? selectedProperty.name : bld.name || 'RV Block';
   const ulpin2D = selectedProperty ? selectedProperty.ulpin2D : bld.ulpin2D || '29-01-001-000123';
-  const propertyType = selectedProperty ? selectedProperty.propertyType : bld.propertyType || 'Educational';
-  const totalFloors = selectedProperty ? selectedProperty.floors : buildingData?.floors?.length || 4;
+  const propertyType = selectedProperty ? selectedProperty.propertyType : bld.propertyType || 'Academic Block';
+  const totalFloors = selectedProperty ? selectedProperty.floors : buildingData?.floors?.length || 5;
 
   const handleCopy = (text, fieldName = 'ulpin') => {
     navigator.clipboard?.writeText(text);
@@ -54,11 +56,22 @@ export default function PropertyDetails() {
         : selectedRoom.id)
     : null;
 
+  // Generate standardized prototype property ID (e.g. TN-TRY-SCE-RV-F03-R403)
+  const floorNum = selectedRoom ? parseInt(selectedRoom.floorId?.replace(/\D/g, '') || '0', 10) : 0;
+  const roomCleanNum = selectedRoom ? selectedRoom.name?.replace(/\D/g, '') || '101' : '101';
+  const prototypePropertyId = selectedRoom 
+    ? generatePrototypePropertyId(bld.id === 'rv-block' ? 'RV' : (selectedProperty?.buildingConfig?.roomPrefix || 'BLD'), floorNum, roomCleanNum)
+    : null;
+
   const area = selectedRoom ? calculateArea(selectedRoom) : null;
   const volume = selectedRoom ? (selectedRoom.width * selectedRoom.depth * selectedRoom.height).toFixed(1) : null;
-  const centroidX = selectedRoom ? (selectedRoom.x + selectedRoom.width / 2).toFixed(1) : null;
-  const centroidZ = selectedRoom ? (selectedRoom.y + selectedRoom.depth / 2).toFixed(1) : null;
-  const centroidY = selectedRoom ? (selectedRoom.elevation + selectedRoom.height / 2).toFixed(1) : null;
+  const localX = selectedRoom ? (selectedRoom.x + selectedRoom.width / 2).toFixed(2) : null;
+  const localZ = selectedRoom ? (selectedRoom.y + selectedRoom.depth / 2).toFixed(2) : null;
+  const localY = selectedRoom ? (selectedRoom.elevation + selectedRoom.height / 2).toFixed(2) : null;
+
+  // Building GIS Anchor
+  const anchorLat = selectedProperty?.coordinates?.latitude || bld.coordinates?.latitude || gisData.pilotBuilding.geographicAnchor.latitude;
+  const anchorLng = selectedProperty?.coordinates?.longitude || bld.coordinates?.longitude || gisData.pilotBuilding.geographicAnchor.longitude;
 
   // Vertical Stack analysis for the selected room
   const stackInfo = selectedRoom ? detectVerticalStack(selectedRoom, allRooms) : null;
@@ -74,8 +87,13 @@ export default function PropertyDetails() {
           >
             <ArrowLeft size={12} /> Back to 2D Map
           </button>
-          <div className="text-[10px] uppercase font-bold tracking-wider text-cipher-govblue">
-            {selectedRoom ? 'Selected Spatial Unit' : 'Building Cadastre'}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-cipher-govblue">
+              {selectedRoom ? '3D Spatial Unit Cadastre' : 'Building Cadastre'}
+            </span>
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              Prototype
+            </span>
           </div>
           <h2 className="text-base font-extrabold text-cipher-navy mt-0.5 leading-tight">
             {selectedRoom ? selectedRoom.name : propertyName}
@@ -93,13 +111,13 @@ export default function PropertyDetails() {
         )}
       </div>
 
-      {/* 2D & 3D ULPIN Card */}
-      <div className="p-3 rounded-xl bg-slate-50 border border-cipher-border space-y-2">
-        {/* 2D Land Parcel */}
+      {/* Property Identifiers Card (ULPIN & Prototype Vertical ID) */}
+      <div className="p-3 rounded-xl bg-slate-50 border border-cipher-border space-y-2.5">
+        {/* 2D Land Parcel ULPIN */}
         <div>
           <div className="flex items-center justify-between text-[10px] text-cipher-muted uppercase font-bold mb-0.5">
             <span>2D LAND ULPIN</span>
-            <span className="text-emerald-600 font-semibold flex items-center gap-1 normal-case">
+            <span className="text-emerald-600 font-semibold flex items-center gap-1 normal-case text-[10px]">
               <CheckCircle2 size={11} /> Verified Parcel
             </span>
           </div>
@@ -117,13 +135,13 @@ export default function PropertyDetails() {
           </div>
         </div>
 
-        {/* 3D Unit ULPIN (if unit selected) */}
+        {/* 3D Generated ULPIN */}
         {selected3DULPIN && (
           <div className="pt-2 border-t border-cipher-borderLight">
             <div className="flex items-center justify-between text-[10px] text-cipher-muted uppercase font-bold mb-0.5">
               <span>GENERATED 3D ULPIN</span>
               <span className="text-cipher-govblue font-semibold text-[10px]">
-                Active Sub-Parcel
+                Standard 3D Index
               </span>
             </div>
             <div className="flex items-center justify-between gap-1 bg-blue-50/80 p-2 rounded-lg border border-blue-200/80">
@@ -140,46 +158,99 @@ export default function PropertyDetails() {
             </div>
           </div>
         )}
+
+        {/* Prototype Vertical Property Identifier */}
+        {prototypePropertyId && (
+          <div className="pt-2 border-t border-cipher-borderLight">
+            <div className="flex items-center justify-between text-[10px] text-cipher-muted uppercase font-bold mb-0.5">
+              <span>PROTOTYPE PROPERTY ID</span>
+              <span className="text-[9px] font-mono text-slate-500">Cadastre Tag</span>
+            </div>
+            <div className="flex items-center justify-between gap-1 bg-slate-100/80 px-2 py-1.5 rounded-lg border border-slate-200">
+              <span className="mono text-xs font-bold text-slate-800 select-all break-all">
+                {prototypePropertyId}
+              </span>
+              <button
+                onClick={() => handleCopy(prototypePropertyId, 'proto')}
+                className="shrink-0 p-1 rounded hover:bg-white text-slate-500 hover:text-slate-800 transition-all"
+                title="Copy Prototype ID"
+              >
+                {copiedField === 'proto' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+              </button>
+            </div>
+            <p className="text-[9px] text-cipher-muted mt-1 italic">
+              Prototype GIS + Local Spatial Mapping
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Selected Room Details Grid */}
+      {/* Selected Room Multi-Tier Spatial Model */}
       {selectedRoom ? (
         <div className="space-y-3">
-          <div>
-            <div className="text-[11px] font-bold text-cipher-navy uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <Ruler size={13} className="text-cipher-govblue" />
-              <span>Unit Cadastral Specifications</span>
+          {/* 1. Global GIS Location */}
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <div className="text-[10px] font-bold text-cipher-navy uppercase tracking-wider flex items-center justify-between">
+              <span className="flex items-center gap-1 text-cipher-govblue">
+                <Globe size={12} />
+                Global GIS Location
+              </span>
+              <span className="mono text-[9px] text-cipher-muted">WGS84</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">UNIT TYPE</div>
-                <div className="font-bold text-cipher-navy mt-0.5 truncate">{selectedRoom.type}</div>
+              <div>
+                <span className="text-[9px] text-cipher-muted uppercase block">BUILDING LAT</span>
+                <span className="font-bold text-cipher-navy mono text-[11px]">{anchorLat?.toFixed(6)}° N</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">FLOOR LEVEL</div>
-                <div className="font-bold text-cipher-navy mt-0.5 mono truncate">
-                  {selectedRoom.floorShortName || selectedRoom.floorId} (+{selectedRoom.elevation}m)
-                </div>
+              <div>
+                <span className="text-[9px] text-cipher-muted uppercase block">BUILDING LNG</span>
+                <span className="font-bold text-cipher-navy mono text-[11px]">{anchorLng?.toFixed(6)}° E</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">FLOOR AREA</div>
-                <div className="font-bold text-cipher-govblue mt-0.5 mono">{area} m²</div>
+            </div>
+          </div>
+
+          {/* 2. Local 3D Cartesian Coordinates & Vertical Elevation */}
+          <div>
+            <div className="text-[11px] font-bold text-cipher-navy uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+              <Ruler size={13} className="text-cipher-govblue" />
+              <span>Local 3D &amp; Vertical Geometry</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 text-xs">
+              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="text-[9px] text-cipher-muted font-bold">LOCAL X</div>
+                <div className="font-bold text-cipher-navy mono text-[11px] mt-0.5">{localX}m</div>
               </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">DIMENSIONS (W×D×H)</div>
-                <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px]">
-                  {selectedRoom.width.toFixed(1)}m × {selectedRoom.depth.toFixed(1)}m × {selectedRoom.height.toFixed(1)}m
-                </div>
+              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="text-[9px] text-cipher-muted font-bold">LOCAL Y (ALT)</div>
+                <div className="font-bold text-cipher-navy mono text-[11px] mt-0.5">+{localY}m</div>
               </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">VOLUME</div>
-                <div className="font-bold text-cipher-navy mt-0.5 mono">{volume} m³</div>
+              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="text-[9px] text-cipher-muted font-bold">LOCAL Z</div>
+                <div className="font-bold text-cipher-navy mono text-[11px] mt-0.5">{localZ}m</div>
               </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-cipher-muted font-medium">3D CENTROID (X, Y, Z)</div>
-                <div className="font-bold text-cipher-navy mt-0.5 mono text-[10px]">
-                  [{centroidX}, {centroidY}, {centroidZ}]m
-                </div>
+            </div>
+          </div>
+
+          {/* 3. Cadastral Metadata Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="text-[10px] text-cipher-muted font-medium">UNIT TYPE</div>
+              <div className="font-bold text-cipher-navy mt-0.5 truncate">{selectedRoom.type}</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="text-[10px] text-cipher-muted font-medium">FLOOR LEVEL</div>
+              <div className="font-bold text-cipher-navy mt-0.5 mono truncate">
+                {selectedRoom.floorShortName || selectedRoom.floorId} (+{selectedRoom.elevation}m)
+              </div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="text-[10px] text-cipher-muted font-medium">FLOOR AREA</div>
+              <div className="font-bold text-cipher-govblue mt-0.5 mono">{area} m²</div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="text-[10px] text-cipher-muted font-medium">DIMENSIONS (W×D×H)</div>
+              <div className="font-bold text-cipher-navy mt-0.5 mono text-[10px]">
+                {selectedRoom.width.toFixed(1)}m × {selectedRoom.depth.toFixed(1)}m × {selectedRoom.height.toFixed(1)}m
               </div>
             </div>
           </div>
@@ -193,7 +264,7 @@ export default function PropertyDetails() {
                   Vertical Column Stack
                 </span>
                 <span className="text-[10px] font-semibold text-cipher-govblue bg-white px-2 py-0.5 rounded border border-blue-200">
-                  {stackInfo.stack.length} Stacked Units
+                  {stackInfo.stack.length} Units
                 </span>
               </div>
               <div className="space-y-1.5">
@@ -209,7 +280,7 @@ export default function PropertyDetails() {
                         <div className="text-[10px] text-slate-500">{stackInfo.above.floorShortName} (+{stackInfo.above.elevation}m)</div>
                       </div>
                     </div>
-                    <span className="text-[10px] text-cipher-govblue font-bold">Inspect Unit Above →</span>
+                    <span className="text-[10px] text-cipher-govblue font-bold">Above →</span>
                   </button>
                 )}
 
@@ -230,7 +301,7 @@ export default function PropertyDetails() {
                         <div className="text-[10px] text-slate-500">{stackInfo.below.floorShortName} (+{stackInfo.below.elevation}m)</div>
                       </div>
                     </div>
-                    <span className="text-[10px] text-cipher-govblue font-bold">Inspect Unit Below →</span>
+                    <span className="text-[10px] text-cipher-govblue font-bold">Below →</span>
                   </button>
                 )}
               </div>
@@ -257,16 +328,16 @@ export default function PropertyDetails() {
               <div className="font-bold text-cipher-navy mt-0.5 mono">{totalFloors} Spatial Floors</div>
             </div>
             <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-              <div className="text-[10px] text-cipher-muted font-medium">FOOTPRINT</div>
-              <div className="font-bold text-cipher-navy mt-0.5 mono text-[11px]">
-                {bld.footprintWidthM || 60}m × {bld.footprintDepthM || 20}m
+              <div className="text-[10px] text-cipher-muted font-medium">GIS ANCHOR (WGS84)</div>
+              <div className="font-bold text-cipher-navy mt-0.5 mono text-[10px]">
+                {anchorLat?.toFixed(4)}°N, {anchorLng?.toFixed(4)}°E
               </div>
             </div>
           </div>
           <div className="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-200 text-center">
             <p className="text-xs text-cipher-navy font-semibold">Touch or Click any 3D Block</p>
             <p className="text-[11px] text-cipher-muted mt-0.5">
-              Instantly inspect exact unit measurements, 3D ULPIN, and vertical stack.
+              Inspect Global GIS (WGS84) + Local 3D Coordinates (XYZ) and Vertical ULPIN.
             </p>
           </div>
         </div>
@@ -276,8 +347,8 @@ export default function PropertyDetails() {
       <div className="p-2.5 rounded-xl bg-slate-50 border border-cipher-border flex items-center justify-between text-xs mt-auto">
         <div className="flex items-center gap-2">
           <Lock size={13} className="text-cipher-govblue" />
-          <span className="text-cipher-muted text-[11px]">Cadastre Record:</span>
-          <span className="font-bold text-emerald-600 text-[11px]">✓ Verified 3D GIS</span>
+          <span className="text-cipher-muted text-[11px]">GIS Reference:</span>
+          <span className="font-bold text-emerald-600 text-[11px]">✓ WGS84 EPSG:4326</span>
         </div>
         <span className="text-[10px] text-cipher-muted mono font-semibold">CIPHERCORE</span>
       </div>

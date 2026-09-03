@@ -11,6 +11,11 @@ import {
   MapPin,
   CheckCircle2,
   ExternalLink,
+  Globe,
+  Compass,
+  Box,
+  Database,
+  Cpu
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { countVerticalRelationships } from '../utils/verticalAnalysis.js';
@@ -19,6 +24,7 @@ import BuildingControls from '../three/BuildingControls.jsx';
 import PropertyPanel from '../components/PropertyPanel.jsx';
 import FloorSelector from '../components/FloorSelector.jsx';
 import ULPINMap from '../components/ULPINMap.jsx';
+import { gisData } from '../data/gisData.js';
 
 export default function Dashboard() {
   const { buildingData, allRooms, conflicts, setCurrentPage, selectRoom, viewMode, setViewMode } = useApp();
@@ -27,31 +33,31 @@ export default function Dashboard() {
 
   const stats = [
     {
-      label: 'Registered Parcels',
-      value: allRooms.length,
-      sub: `${buildingData.floors.length} Spatial Floor Levels`,
-      icon: Ruler,
-      color: 'text-cipher-navy',
+      label: 'Campus GIS Anchor',
+      value: `${gisData.campus.latitude.toFixed(3)}°N`,
+      sub: 'WGS84 EPSG:4326',
+      icon: Globe,
+      color: 'text-cipher-govblue',
       bg: 'bg-blue-50/70',
-      badge: 'Active Registry',
+      badge: 'OpenStreetMap',
+    },
+    {
+      label: 'Pilot Buildings',
+      value: '7 Blocks',
+      sub: 'RV Block Primary Anchor',
+      icon: Building2,
+      color: 'text-cipher-navy',
+      bg: 'bg-slate-100',
+      badge: '3D Extruded',
     },
     {
       label: '3D Mapped Units',
       value: allRooms.length,
       sub: 'Vertical Cadastral Entities',
-      icon: Building2,
-      color: 'text-cipher-govblue',
-      bg: 'bg-slate-100',
-      badge: '3D Surveyed',
-    },
-    {
-      label: 'ULPIN Records',
-      value: allRooms.length,
-      sub: '100% Identifiers Generated',
       icon: Hash,
       color: 'text-cipher-accent',
       bg: 'bg-sky-50',
-      badge: 'Standard Compliant',
+      badge: '3D ULPIN Indexed',
     },
     {
       label: 'Vertical Stacks',
@@ -60,7 +66,7 @@ export default function Dashboard() {
       icon: ArrowUpDown,
       color: 'text-cipher-navy',
       bg: 'bg-indigo-50/70',
-      badge: 'Spatial Aligned',
+      badge: 'Column Linked',
     },
     {
       label: 'Spatial QA Status',
@@ -78,36 +84,39 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-cipher-border">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
-              Land Administration Portal
+              Land Administration &amp; GIS Cadastre
             </span>
             <span className="text-xs text-cipher-muted">·</span>
             <span className="text-xs text-cipher-muted font-medium flex items-center gap-1">
               <MapPin size={12} className="text-cipher-govblue" />
               {buildingData.building.name}, {buildingData.building.institution}
             </span>
+            <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded font-semibold">
+              WGS84 ({gisData.campus.latitude.toFixed(4)}°N, {gisData.campus.longitude.toFixed(4)}°E)
+            </span>
           </div>
           <h1 className="text-2xl font-extrabold text-cipher-navy tracking-tight">
-            Land &amp; Property Overview
+            VERTEX 3D ULPIN &amp; GIS Cadastre Overview
           </h1>
           <p className="text-xs text-cipher-muted mt-0.5">
-            Unified spatial view of land parcels, buildings and vertical property units.
+            Connecting real-world GIS spatial anchors with 3D multi-level vertical property models.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
-            onClick={() => setCurrentPage('explorer')}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cipher-govblue hover:bg-cipher-navy text-white text-xs font-semibold shadow-subtle transition-colors"
+            onClick={() => setCurrentPage('gis-explorer')}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cipher-govblue hover:bg-cipher-navy text-white text-xs font-bold shadow-subtle transition-colors"
           >
-            <Layers size={14} /> Full 3D Map View
+            <Globe size={14} /> Open GIS Explorer
           </button>
           <button
-            onClick={() => setCurrentPage('registry')}
+            onClick={() => setCurrentPage('explorer')}
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-cipher-border hover:bg-slate-50 text-cipher-navy text-xs font-semibold shadow-subtle transition-colors"
           >
-            Browse Registry
+            <Layers size={14} /> 3D Digital Twin
           </button>
         </div>
       </div>
@@ -140,6 +149,56 @@ export default function Dashboard() {
             </div>
           );
         })}
+      </div>
+
+      {/* Professional GIS + 3D Architecture Workflow Diagram */}
+      <div className="gov-card p-5 bg-gradient-to-r from-slate-900 via-cipher-navy to-slate-900 text-white shadow-card rounded-2xl overflow-hidden relative">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/15">
+          <div>
+            <div className="flex items-center gap-2 text-cyan-300 text-[11px] font-mono uppercase tracking-wider font-bold mb-1">
+              <Compass size={14} className="animate-spin-slow" />
+              <span>VERTEX GIS ➔ 3D SPATIAL ARCHITECTURE</span>
+            </div>
+            <h2 className="text-lg font-extrabold tracking-tight text-white">
+              From Global Coordinates to Vertical Sub-Parcels
+            </h2>
+          </div>
+          <div className="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/20 text-center text-xs font-semibold text-cyan-200 max-w-md">
+            “GIS tells us where the building exists on Earth.<br />
+            <span className="text-white font-bold">VERTEX tells us where every property exists inside the building.”</span>
+          </div>
+        </div>
+
+        {/* Interactive Architecture Flow Nodes */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-4">
+          {[
+            { step: '01', title: 'OpenStreetMap', sub: 'WGS84 Tiles (EPSG:4326)', icon: Globe, highlight: '#38BDF8' },
+            { step: '02', title: 'GIS Location', sub: 'Saranathan Campus', icon: MapPin, highlight: '#60A5FA' },
+            { step: '03', title: 'Building Anchor', sub: 'RV Block Geographic Lat/Lng', icon: Building2, highlight: '#F59E0B' },
+            { step: '04', title: '3D Digital Twin', sub: 'Procedural Floor Slabs', icon: Box, highlight: '#818CF8' },
+            { step: '05', title: 'Vertical Cadastre', sub: '3D ULPIN Indexing', icon: Layers, highlight: '#34D399' },
+            { step: '06', title: 'Spatial Intel', sub: 'QA Audit & Stack Graph', icon: Cpu, highlight: '#F472B6' },
+          ].map((node) => {
+            const Icon = node.icon;
+            return (
+              <div
+                key={node.step}
+                className="bg-white/5 hover:bg-white/10 transition-all border border-white/10 rounded-xl p-3 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-mono text-[10px] font-bold text-white/50">{node.step}</span>
+                    <Icon size={14} style={{ color: node.highlight }} />
+                  </div>
+                  <div className="text-xs font-bold text-white">{node.title}</div>
+                </div>
+                <div className="text-[10px] text-slate-300 mt-2 pt-2 border-t border-white/10 truncate">
+                  {node.sub}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Central Spatial Visualizer (1fr) + Property Information Panel (360px) */}
@@ -193,10 +252,10 @@ export default function Dashboard() {
             <div className="p-3 rounded-lg bg-cipher-bg border border-cipher-border">
               <div className="font-bold text-cipher-navy flex items-center gap-2 mb-1">
                 <span className="w-5 h-5 rounded-full bg-blue-100 text-cipher-govblue text-[11px] flex items-center justify-center font-bold">1</span>
-                2D Spatial Ingestion
+                GIS Spatial Anchoring
               </div>
               <p className="text-cipher-muted text-[11px] leading-relaxed">
-                Parse boundary coordinates, room polygons, and parcel attributes directly into cadastral records.
+                Georeference campus footprints to WGS84 coordinates on OpenStreetMap without paid API keys.
               </p>
             </div>
             <div className="p-3 rounded-lg bg-cipher-bg border border-cipher-border">
@@ -236,8 +295,9 @@ export default function Dashboard() {
             </h3>
             <div className="space-y-2">
               {[
+                { label: 'GIS Explorer (OpenStreetMap)', page: 'gis-explorer', desc: 'Real-world campus georeferencing' },
                 { label: '3D Spatial Explorer', page: 'explorer', desc: 'Inspect vertical digital twin' },
-                { label: 'Building Floor Plans', page: 'floor-mapping', desc: '2D cadastral boundary view' },
+                { label: 'Building Floor Plans', page: 'floor-mapping', desc: '2D cadastral blueprint plan' },
                 { label: 'Vertical Stack Structure', page: 'vertical-analysis', desc: 'Column relationship inspector' },
                 { label: 'Spatial QA & Audit', page: 'conflict-detection', desc: 'Automated geometric validation' },
                 { label: 'Property Registry', page: 'registry', desc: 'Searchable government ledger' },
@@ -245,7 +305,7 @@ export default function Dashboard() {
                 <button
                   key={m.page}
                   onClick={() => setCurrentPage(m.page)}
-                  className="w-full flex items-center justify-between p-2.5 rounded-lg bg-cipher-bg border border-cipher-border hover:border-cipher-govblue hover:bg-blue-50/40 text-left transition-all group"
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg bg-cipher-bg border border-cipher-border hover:border-cipher-govblue hover:bg-blue-50/40 text-left transition-all group cursor-pointer"
                 >
                   <div>
                     <div className="text-xs font-bold text-cipher-navy group-hover:text-cipher-govblue">
@@ -259,7 +319,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="pt-3 border-t border-cipher-border text-[10px] text-cipher-muted text-center mt-3">
-            Pilot Entity: <strong className="text-cipher-navy">{buildingData.building.name}</strong> · {buildingData.building.institutionCode}
+            Pilot Entity: <strong className="text-cipher-navy">{buildingData.building.name}</strong> · {gisData.campus.shortName}
           </div>
         </div>
       </div>
