@@ -1,11 +1,11 @@
 import React from 'react';
-import { Layers, ShieldCheck, MapPin, Building, LogOut, UserCheck } from 'lucide-react';
+import { Layers, ShieldCheck, MapPin, Building, Box, Building2, ChevronDown, Wifi, LogOut, UserCheck } from 'lucide-react';
 import SearchBar from './SearchBar.jsx';
 import { useApp } from '../context/AppContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
-  const { buildingData } = useApp();
+  const { buildingData, setShowWelcome } = useApp();
   const { user, logout } = useAuth();
 
   const userInitials = user?.name
@@ -69,7 +69,7 @@ export default function Navbar() {
           Registry Active
         </div>
 
-        {user && (
+        {user ? (
           <div className="flex items-center gap-2.5 pl-3 border-l border-cipher-border">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-cipher-navy text-white flex items-center justify-center text-xs font-bold shadow-sm">
@@ -98,6 +98,16 @@ export default function Navbar() {
               <LogOut size={13} />
               <span className="hidden sm:inline">Logout</span>
             </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2.5 pl-3 border-l border-cipher-border">
+            <div className="w-8 h-8 rounded-full bg-cipher-navy/5 border border-cipher-border flex items-center justify-center text-cipher-navy text-xs font-bold">
+              GA
+            </div>
+            <div className="hidden md:block text-left">
+              <div className="text-xs font-semibold text-cipher-navy leading-tight">Gov Admin</div>
+              <div className="text-[10px] text-cipher-muted leading-tight">Survey &amp; Records</div>
+            </div>
           </div>
         )}
       </div>

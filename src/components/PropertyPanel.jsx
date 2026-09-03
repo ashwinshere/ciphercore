@@ -114,7 +114,7 @@ export default function PropertyPanel() {
   const { above, below, stack } = detectVerticalStack(selectedRoom, allRooms);
   const area = calculateArea(selectedRoom);
 
-  const ulpin3D = generate3DULPIN(buildingData.building, selectedRoom.floorId, selectedRoom.number);
+  const ulpin3D = selectedRoom.id || generate3DULPIN(buildingData.building, selectedRoom.floorId, selectedRoom.number);
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(ulpin3D);

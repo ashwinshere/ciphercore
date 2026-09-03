@@ -1,17 +1,27 @@
 /**
- * Generates a 3D ULPIN based on the 2D ULPIN, floor number, and unit number.
- * Format: [2D-ULPIN]-F[Floor]-U[Unit]
+ * Generates a standard 3D ULPIN based on the 2D ULPIN, floor number, and unit number.
+ * Cadastral Format: [2D-ULPIN]-[FLOOR-ID]-U[UNIT-ID]
+ * Example: 29-01-001-000128-F03-U007
  */
 export function generate3DULPIN(property, floorId, unitNumber) {
-  if (!property || !property.ulpin2D) return 'UNKNOWN';
+  const ulpin2D = (typeof property === 'string' ? property : property?.ulpin2D) || '29-01-001-000123';
   
-  // Format floor: F01, F02, etc. (floorId is usually 'F01' already, but just in case)
-  const formattedFloor = floorId.startsWith('F') ? floorId : `F${String(floorId).padStart(2, '0')}`;
+  // Format floor: F00, F01, F02, etc.
+  let formattedFloor = String(floorId || 'F00');
+  if (!formattedFloor.startsWith('F')) {
+    formattedFloor = `F${String(floorId).padStart(2, '0')}`;
+  }
   
-  // Format unit: U01, U02, etc.
-  const formattedUnit = unitNumber.toString().startsWith('U') 
-    ? unitNumber 
-    : `U${String(unitNumber).padStart(2, '0')}`;
+  // Format unit: U001, U002, etc.
+  let formattedUnit = String(unitNumber || 'U001');
+  if (!formattedUnit.startsWith('U')) {
+    formattedUnit = `U${String(unitNumber).padStart(3, '0')}`;
+  } else {
+    const digits = formattedUnit.replace(/\D/g, '');
+    if (digits.length > 0 && digits.length < 3) {
+      formattedUnit = `U${digits.padStart(3, '0')}`;
+    }
+  }
     
-  return `${property.ulpin2D}-${formattedFloor}-${formattedUnit}`;
+  return `${ulpin2D}-${formattedFloor}-${formattedUnit}`;
 }

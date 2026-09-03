@@ -38,9 +38,9 @@ export default function PropertyDetails() {
   };
 
   const selected3DULPIN = selectedRoom
-    ? (selectedProperty 
+    ? (selectedRoom.id || (selectedProperty 
         ? generate3DULPIN(selectedProperty, selectedRoom.floorNumId || selectedRoom.floorId, selectedRoom.number || selectedRoom.name)
-        : selectedRoom.id)
+        : selectedRoom.id))
     : null;
 
   return (

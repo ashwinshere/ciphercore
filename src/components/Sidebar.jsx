@@ -29,9 +29,6 @@ export default function Sidebar() {
     if (id === 'dashboard') {
       setCurrentPage('dashboard');
       setViewMode('map');
-    } else if (id === 'explorer') {
-      setCurrentPage('dashboard');
-      setViewMode('3d');
     } else {
       setCurrentPage(id);
     }
@@ -48,13 +45,7 @@ export default function Sidebar() {
       <div className="flex flex-col gap-1 flex-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          let active = currentPage === item.id;
-
-          if (currentPage === 'dashboard') {
-            if (viewMode === 'map' && item.id === 'dashboard') active = true;
-            if (viewMode === '3d' && item.id === 'explorer') active = true;
-            if (viewMode === '3d' && item.id === 'dashboard') active = false;
-          }
+          const active = currentPage === item.id;
 
           return (
             <button

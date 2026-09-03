@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AppProvider, useApp } from './context/AppContext.jsx';
+import WelcomeModal from './components/WelcomeModal.jsx';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Login from './pages/Login.jsx';
@@ -28,11 +29,13 @@ function Layout() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cipher-bg text-cipher-text gis-grid-bg">
+      <WelcomeModal />
+>>>>>>>>> Temporary merge branch 2
       <Navbar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="max-w-7xl mx-auto h-full">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 min-w-0">
+          <div className="max-w-7xl mx-auto h-full min-h-0">
             <Page />
           </div>
         </main>
