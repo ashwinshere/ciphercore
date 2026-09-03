@@ -83,7 +83,8 @@ export default function PropertyRoom({
   onUnhover,
 }) {
   const meshRef = useRef();
-  const { wireframeMode } = useApp();
+  const pointerDownPos = useRef({ x: 0, y: 0 });
+  const { wireframeMode, selectRoom } = useApp();
 
   const cfg = TYPE_CONFIG[room.type] || TYPE_CONFIG['Classroom'];
 
@@ -110,11 +111,11 @@ export default function PropertyRoom({
   const opacity = dimmed
     ? 0.12
     : isSelected
-    ? 0.85
+    ? 0.88
     : isHovered
     ? 0.65
     : isStackMember
-    ? 0.7
+    ? 0.72
     : 0.45;
 
   useFrame(() => {
@@ -126,15 +127,28 @@ export default function PropertyRoom({
     );
   });
 
+  const handleTriggerSelect = (e) => {
+    e?.stopPropagation?.();
+    selectRoom(room.id, { focus: true });
+    onSelect?.(room);
+  };
+
   return (
     <group position={[centerX, centerY, centerZ]}>
       {/* Main Room Volume with Architectural Glass / Facade styling */}
       <mesh
         ref={meshRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect?.(room);
+        onPointerDown={(e) => {
+          pointerDownPos.current = { x: e.clientX || 0, y: e.clientY || 0 };
         }}
+        onPointerUp={(e) => {
+          const dx = Math.abs((e.clientX || 0) - pointerDownPos.current.x);
+          const dy = Math.abs((e.clientY || 0) - pointerDownPos.current.y);
+          if (dx < 8 && dy < 8) {
+            handleTriggerSelect(e);
+          }
+        }}
+        onClick={handleTriggerSelect}
         onPointerOver={(e) => {
           e.stopPropagation();
           onHover?.(room);

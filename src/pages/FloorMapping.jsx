@@ -13,8 +13,12 @@ import {
   Layers,
   Info,
   ChevronRight,
-  Maximize2
+  Maximize2,
+  Box,
+  Ruler
 } from 'lucide-react';
+import { generate3DULPIN } from '../utils/ulpin.js';
+import { generatePrototypePropertyId } from '../data/gisData.js';
 
 const PADDING = 6;
 
@@ -34,11 +38,11 @@ export default function FloorMapping() {
   const [filterType, setFilterType] = useState('ALL');
 
   const bld = buildingData?.building || {
-    name: 'Academic Block',
-    footprintWidthM: 60,
-    footprintDepthM: 20,
-    ulpin2D: 'TN-TR-2024-ULP-001',
-    propertyType: 'Educational'
+    name: 'RV Block',
+    footprintWidthM: 80,
+    footprintDepthM: 70,
+    ulpin2D: '29-01-001-000123',
+    propertyType: 'Academic Block'
   };
 
   const floors = buildingData?.floors || [];
@@ -78,23 +82,23 @@ export default function FloorMapping() {
 
   // Central corridor & staircase core
   const corridor = {
-    x: xMin + 0.5,
+    x: xMin + 1,
     y: -1.5,
-    width: bWidth - 1,
+    width: bWidth - 2,
     depth: 3
   };
 
   const staircase = {
-    x: xMax - 8.5,
+    x: xMax - 9.5,
     y: -1.4,
-    width: 7.5,
+    width: 8.5,
     depth: 2.8
   };
 
   const elevatorCore = {
-    x: xMin + 1,
+    x: xMin + 1.5,
     y: -1.4,
-    width: 4.5,
+    width: 5.5,
     depth: 2.8
   };
 
@@ -112,87 +116,76 @@ export default function FloorMapping() {
   const getRoomColors = (room, isSelected, isHovered) => {
     if (isSelected) {
       return {
-        fill: '#0284c7',
-        fillOpacity: 0.85,
-        stroke: '#0369a1',
-        textColor: '#ffffff',
-        subTextColor: '#e0f2fe'
+        fill: '#0284C7',
+        fillOpacity: 0.9,
+        stroke: '#0369A1',
+        strokeWidth: '0.4',
+        textColor: '#FFFFFF',
+        subTextColor: '#E0F2FE'
       };
     }
     if (isHovered) {
       return {
-        fill: '#38bdf8',
-        fillOpacity: 0.35,
-        stroke: '#0284c7',
-        textColor: '#0f172a',
-        subTextColor: '#0369a1'
+        fill: '#38BDF8',
+        fillOpacity: 0.45,
+        stroke: '#0284C7',
+        strokeWidth: '0.3',
+        textColor: '#0F172A',
+        subTextColor: '#0369A1'
       };
     }
     const t = (room.type || '').toLowerCase();
     if (t.includes('lab')) {
       return {
-        fill: '#e0e7ff',
-        fillOpacity: 0.5,
-        stroke: '#6366f1',
-        textColor: '#312e81',
-        subTextColor: '#4f46e5'
+        fill: '#EEF2FF',
+        fillOpacity: 0.85,
+        stroke: '#6366F1',
+        strokeWidth: '0.2',
+        textColor: '#312E81',
+        subTextColor: '#4F46E5'
       };
     }
     if (t.includes('admin') || t.includes('reception')) {
       return {
-        fill: '#dcfce7',
-        fillOpacity: 0.55,
-        stroke: '#10b981',
-        textColor: '#064e3b',
+        fill: '#ECFDF5',
+        fillOpacity: 0.85,
+        stroke: '#10B981',
+        strokeWidth: '0.2',
+        textColor: '#064E3B',
         subTextColor: '#059669'
       };
     }
     if (t.includes('seminar') || t.includes('tutorial')) {
       return {
-        fill: '#fef3c7',
-        fillOpacity: 0.55,
-        stroke: '#f59e0b',
-        textColor: '#78350f',
-        subTextColor: '#d97706'
+        fill: '#FFFBEB',
+        fillOpacity: 0.85,
+        stroke: '#F59E0B',
+        strokeWidth: '0.2',
+        textColor: '#78350F',
+        subTextColor: '#D97706'
       };
     }
     // Default classroom
     return {
-      fill: '#dbeafe',
-      fillOpacity: 0.55,
-      stroke: '#3b82f6',
-      textColor: '#1e3a8a',
-      subTextColor: '#2563eb'
+      fill: '#EFF6FF',
+      fillOpacity: 0.85,
+      stroke: '#3B82F6',
+      strokeWidth: '0.2',
+      textColor: '#1E3A8A',
+      subTextColor: '#2563EB'
     };
   };
 
-  if (!selectedProperty && !bld) {
-    return (
-      <div className="fade-in p-8 text-center bg-white border border-cipher-border rounded-xl shadow-subtle flex flex-col items-center">
-        <Building2 size={36} className="text-slate-400 mb-3" />
-        <h2 className="text-lg font-bold text-cipher-navy mb-1">No Property Selected</h2>
-        <p className="text-xs text-cipher-muted max-w-sm mb-4">
-          Please select a building from the satellite map to inspect its floor plans and unit layout.
-        </p>
-        <button
-          onClick={() => {
-            setViewMode('map');
-            setCurrentPage('dashboard');
-          }}
-          className="px-4 py-2 bg-cipher-govblue text-white rounded-lg text-xs font-bold shadow-subtle hover:bg-cipher-navy transition-colors"
-        >
-          Select Building on Map
-        </button>
-      </div>
-    );
-  }
+  const handleUnitClick = (room) => {
+    selectRoom(room.id, { focus: true });
+  };
 
   return (
     <div className="fade-in space-y-4 pb-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-cipher-border">
         <div>
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
               2D Architectural Floor Cadastre
             </span>
@@ -203,14 +196,14 @@ export default function FloorMapping() {
             </span>
           </div>
           <h1 className="text-xl font-extrabold text-cipher-navy tracking-tight">
-            Floor Blueprint &amp; Spatial Unit Cadastre — {bld.name}
+            Floor Blueprint &amp; 3D ULPIN Spatial Mapping — {bld.name}
           </h1>
         </div>
 
         <button
           onClick={() => {
             setViewMode('3d');
-            setCurrentPage('dashboard');
+            setCurrentPage('explorer');
           }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cipher-govblue text-white text-xs font-bold hover:bg-cipher-navy transition-all shadow-subtle self-start sm:self-auto"
         >
@@ -243,7 +236,7 @@ export default function FloorMapping() {
           <div className="text-[10px] text-cipher-muted uppercase font-semibold">PROPERTY TYPE</div>
           <div className="font-bold text-cipher-navy text-xs mt-0.5">{bld.propertyType}</div>
           <div className="text-[11px] text-amber-600 font-medium flex items-center gap-1 mt-0.5">
-            <ShieldCheck size={11} /> Geometry: {bld.prototypeStatus}
+            <ShieldCheck size={11} /> Geometry: {bld.prototypeStatus || 'Prototype'}
           </div>
         </div>
       </div>
@@ -252,7 +245,7 @@ export default function FloorMapping() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 border border-cipher-border rounded-xl shadow-subtle">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           <span className="text-xs font-bold text-cipher-navy uppercase tracking-wider mr-1 shrink-0">
-            Level:
+            Select Level:
           </span>
           {floors.map((fl, idx) => (
             <button
@@ -290,21 +283,21 @@ export default function FloorMapping() {
 
       {/* Main Floor Blueprint + Property Panel Split */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4">
-        {/* Left: 2D Architectural Blueprint Plan */}
-        <div className="gov-card p-4 flex flex-col min-h-[560px]">
+        {/* Left: 2D Architectural Blueprint Plan (Light Theme CAD View) */}
+        <div className="gov-card p-4 flex flex-col min-h-[560px] bg-white">
           {/* Blueprint Card Header */}
           <div className="flex items-center justify-between pb-3 border-b border-cipher-border mb-3">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-extrabold text-cipher-navy">
-                  {currentFloor.name} Architectural Blueprint
+                  {currentFloor.name} Top-Down Plan
                 </h3>
                 <span className="mono text-[10px] font-bold text-cipher-govblue bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
                   +{currentFloor.elevation.toFixed(1)}m ELEVATION
                 </span>
               </div>
               <p className="text-[11px] text-cipher-muted mt-0.5">
-                Interactive top-down spatial cadastre. Click any unit to inspect its vertical ULPIN.
+                Click any spatial room unit to generate its 3D ULPIN and view cadastral measurements.
               </p>
             </div>
 
@@ -334,9 +327,8 @@ export default function FloorMapping() {
             </div>
           </div>
 
-          {/* SVG Blueprint Canvas */}
-          <div className="flex-1 w-full min-h-[440px] rounded-xl bg-[#081325] border border-slate-700/60 overflow-hidden relative flex items-center justify-center p-2 shadow-inner">
-            {/* Architectural Grid Overlay */}
+          {/* SVG Blueprint Canvas in Clean Light Architectural CAD Theme */}
+          <div className="flex-1 w-full min-h-[440px] rounded-xl bg-[#F8FAFC] border border-slate-200 overflow-hidden relative flex items-center justify-center p-2 shadow-inner">
             <div
               className="w-full h-full flex items-center justify-center transition-transform duration-200"
               style={{ transform: `scale(${zoomLevel})` }}
@@ -344,20 +336,19 @@ export default function FloorMapping() {
               <svg
                 viewBox={viewBox}
                 className="w-full h-full max-h-[480px] select-none"
-                style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' }}
               >
                 <defs>
-                  {/* Blueprint Grid Pattern */}
-                  <pattern id="cadGrid" width="5" height="5" patternUnits="userSpaceOnUse">
-                    <path d="M 5 0 L 0 0 0 5" fill="none" stroke="#1e293b" strokeWidth="0.08" />
+                  {/* Clean CAD Grid Pattern */}
+                  <pattern id="lightCadGrid" width="5" height="5" patternUnits="userSpaceOnUse">
+                    <path d="M 5 0 L 0 0 0 5" fill="none" stroke="#E2E8F0" strokeWidth="0.08" />
                   </pattern>
                   {/* Corridor Hatch Pattern */}
-                  <pattern id="corridorHatch" width="2" height="2" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-                    <line x1="0" y1="0" x2="0" y2="2" stroke="#334155" strokeWidth="0.2" />
+                  <pattern id="lightCorridorHatch" width="2" height="2" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="0" y2="2" stroke="#CBD5E1" strokeWidth="0.15" />
                   </pattern>
                   {/* Staircase Hatch Pattern */}
-                  <pattern id="stairHatch" width="1.2" height="1.2" patternTransform="rotate(0 0 0)" patternUnits="userSpaceOnUse">
-                    <line x1="0" y1="0.6" x2="1.2" y2="0.6" stroke="#f59e0b" strokeWidth="0.15" opacity="0.6" />
+                  <pattern id="lightStairHatch" width="1.2" height="1.2" patternTransform="rotate(0 0 0)" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0.6" x2="1.2" y2="0.6" stroke="#F59E0B" strokeWidth="0.12" opacity="0.6" />
                   </pattern>
                 </defs>
 
@@ -367,19 +358,19 @@ export default function FloorMapping() {
                   y={viewBoxY}
                   width={totalViewWidth}
                   height={totalViewHeight}
-                  fill="url(#cadGrid)"
+                  fill="url(#lightCadGrid)"
                 />
 
-                {/* Outer Cadastral Building Footprint & Boundary */}
+                {/* Outer Building Footprint Boundary */}
                 <rect
                   x={xMin}
                   y={yMin}
                   width={bWidth}
                   height={bDepth}
-                  fill="#0b172a"
-                  stroke="#38bdf8"
-                  strokeWidth="0.35"
-                  strokeDasharray="2 1"
+                  fill="#FFFFFF"
+                  stroke="#64748B"
+                  strokeWidth="0.3"
+                  strokeDasharray="1.5 1"
                   rx="0.4"
                 />
 
@@ -389,30 +380,28 @@ export default function FloorMapping() {
                   y={corridor.y}
                   width={corridor.width}
                   height={corridor.depth}
-                  fill="#172554"
-                  stroke="#1e3a8a"
-                  strokeWidth="0.2"
-                  opacity="0.9"
+                  fill="#F1F5F9"
+                  stroke="#94A3B8"
+                  strokeWidth="0.15"
                 />
                 <rect
                   x={corridor.x}
                   y={corridor.y}
                   width={corridor.width}
                   height={corridor.depth}
-                  fill="url(#corridorHatch)"
-                  opacity="0.35"
+                  fill="url(#lightCorridorHatch)"
+                  opacity="0.4"
                 />
                 <text
                   x={0}
                   y={0.35}
-                  fontSize="0.95"
-                  fill="#60a5fa"
-                  letterSpacing="0.15"
+                  fontSize="0.9"
+                  fill="#475569"
+                  letterSpacing="0.12"
                   textAnchor="middle"
                   fontWeight="bold"
-                  opacity="0.8"
                 >
-                  CENTRAL CIRCULATION CORRIDOR ({bWidth}m × {corridor.depth}m)
+                  CENTRAL CORRIDOR ({bWidth}m × {corridor.depth}m)
                 </text>
 
                 {/* Staircase / Core Zone */}
@@ -422,9 +411,9 @@ export default function FloorMapping() {
                     y={staircase.y}
                     width={staircase.width}
                     height={staircase.depth}
-                    fill="#451a03"
-                    stroke="#f59e0b"
-                    strokeWidth="0.25"
+                    fill="#FEF3C7"
+                    stroke="#D97706"
+                    strokeWidth="0.2"
                     rx="0.2"
                   />
                   <rect
@@ -432,29 +421,29 @@ export default function FloorMapping() {
                     y={staircase.y}
                     width={staircase.width}
                     height={staircase.depth}
-                    fill="url(#stairHatch)"
+                    fill="url(#lightStairHatch)"
                   />
                   <text
                     x={staircase.x + staircase.width / 2}
                     y={staircase.y + staircase.depth / 2 + 0.3}
-                    fontSize="0.85"
-                    fill="#fbbf24"
+                    fontSize="0.8"
+                    fill="#92400E"
                     textAnchor="middle"
                     fontWeight="bold"
                   >
-                    STAIRCASE / CORE
+                    STAIRCASE
                   </text>
                 </g>
 
-                {/* Elevator Shaft Core */}
+                {/* Lift / Access Shaft */}
                 <g>
                   <rect
                     x={elevatorCore.x}
                     y={elevatorCore.y}
                     width={elevatorCore.width}
                     height={elevatorCore.depth}
-                    fill="#1e1b4b"
-                    stroke="#818cf8"
+                    fill="#EEF2FF"
+                    stroke="#6366F1"
                     strokeWidth="0.2"
                     rx="0.2"
                   />
@@ -462,61 +451,38 @@ export default function FloorMapping() {
                     x={elevatorCore.x + elevatorCore.width / 2}
                     y={elevatorCore.y + elevatorCore.depth / 2 + 0.3}
                     fontSize="0.75"
-                    fill="#c7d2fe"
+                    fill="#3730A3"
                     textAnchor="middle"
                     fontWeight="bold"
                   >
-                    LIFT / ACCESS
+                    ELEVATOR
                   </text>
                 </g>
 
-                {/* Dimension Guides */}
-                {/* Horizontal Dimension (Top) */}
-                <line
-                  x1={xMin}
-                  y1={yMin - 2}
-                  x2={xMax}
-                  y2={yMin - 2}
-                  stroke="#64748b"
-                  strokeWidth="0.15"
-                />
-                <line x1={xMin} y1={yMin - 3} x2={xMin} y2={yMin - 1} stroke="#64748b" strokeWidth="0.15" />
-                <line x1={xMax} y1={yMin - 3} x2={xMax} y2={yMin - 1} stroke="#64748b" strokeWidth="0.15" />
-                <text
-                  x={0}
-                  y={yMin - 2.6}
-                  fontSize="1"
-                  fill="#94a3b8"
-                  textAnchor="middle"
-                  fontWeight="bold"
-                >
+                {/* Dimensions (Top Width & Left Depth) */}
+                <line x1={xMin} y1={yMin - 2} x2={xMax} y2={yMin - 2} stroke="#94A3B8" strokeWidth="0.12" />
+                <line x1={xMin} y1={yMin - 2.8} x2={xMin} y2={yMin - 1.2} stroke="#94A3B8" strokeWidth="0.12" />
+                <line x1={xMax} y1={yMin - 2.8} x2={xMax} y2={yMin - 1.2} stroke="#94A3B8" strokeWidth="0.12" />
+                <text x={0} y={yMin - 2.5} fontSize="0.95" fill="#475569" textAnchor="middle" fontWeight="bold">
                   WIDTH: {bWidth.toFixed(1)}m
                 </text>
 
-                {/* Vertical Dimension (Left) */}
-                <line
-                  x1={xMin - 2}
-                  y1={yMin}
-                  x2={xMin - 2}
-                  y2={yMax}
-                  stroke="#64748b"
-                  strokeWidth="0.15"
-                />
-                <line x1={xMin - 3} y1={yMin} x2={xMin - 1} y2={yMin} stroke="#64748b" strokeWidth="0.15" />
-                <line x1={xMin - 3} y1={yMax} x2={xMin - 1} y2={yMax} stroke="#64748b" strokeWidth="0.15" />
+                <line x1={xMin - 2} y1={yMin} x2={xMin - 2} y2={yMax} stroke="#94A3B8" strokeWidth="0.12" />
+                <line x1={xMin - 2.8} y1={yMin} x2={xMin - 1.2} y2={yMin} stroke="#94A3B8" strokeWidth="0.12" />
+                <line x1={xMin - 2.8} y1={yMax} x2={xMin - 1.2} y2={yMax} stroke="#94A3B8" strokeWidth="0.12" />
                 <text
-                  x={xMin - 2.6}
-                  y={0.35}
-                  fontSize="1"
-                  fill="#94a3b8"
+                  x={xMin - 2.5}
+                  y={0.3}
+                  fontSize="0.95"
+                  fill="#475569"
                   textAnchor="middle"
                   fontWeight="bold"
-                  transform={`rotate(-90 ${xMin - 2.6} 0.35)`}
+                  transform={`rotate(-90 ${xMin - 2.5} 0.3)`}
                 >
                   DEPTH: {bDepth.toFixed(1)}m
                 </text>
 
-                {/* Rooms Rendering */}
+                {/* Rooms Rendering with Accurate Cadastral Coordinates */}
                 {roomsToDisplay.map((room) => {
                   const isSelected = selectedRoom?.id === room.id;
                   const isHovered = hoveredRoomId === room.id;
@@ -529,12 +495,12 @@ export default function FloorMapping() {
                   return (
                     <g
                       key={room.id}
-                      onClick={() => selectRoom(room.id, { focus: true })}
+                      onClick={() => handleUnitClick(room)}
                       onMouseEnter={() => setHoveredRoomId(room.id)}
                       onMouseLeave={() => setHoveredRoomId(null)}
-                      className="cursor-pointer transition-all"
+                      className="cursor-pointer"
                     >
-                      {/* Room Area Rectangle */}
+                      {/* Room Boundary Rect */}
                       <rect
                         x={room.x}
                         y={room.y}
@@ -543,35 +509,33 @@ export default function FloorMapping() {
                         fill={colors.fill}
                         fillOpacity={colors.fillOpacity}
                         stroke={colors.stroke}
-                        strokeWidth={isSelected ? '0.45' : isHovered ? '0.3' : '0.2'}
+                        strokeWidth={colors.strokeWidth}
                         rx="0.3"
                       />
 
-                      {/* Selected Glow Effect */}
+                      {/* Selected Room Highlight Ring */}
                       {isSelected && (
                         <rect
-                          x={room.x - 0.15}
-                          y={room.y - 0.15}
-                          width={room.width + 0.3}
-                          height={room.depth + 0.3}
+                          x={room.x - 0.2}
+                          y={room.y - 0.2}
+                          width={room.width + 0.4}
+                          height={room.depth + 0.4}
                           fill="none"
-                          stroke="#38bdf8"
+                          stroke="#0284C7"
                           strokeWidth="0.25"
                           strokeDasharray="0.8 0.4"
                           rx="0.4"
                         />
                       )}
 
-                      {/* Room Texts */}
-                      {/* Room Code Name */}
+                      {/* Room Name */}
                       <text
                         x={centerX}
                         y={centerY - 0.6}
-                        fontSize="1.05"
+                        fontSize="1.1"
                         fill={colors.textColor}
                         textAnchor="middle"
                         fontWeight="bold"
-                        letterSpacing="0.03"
                       >
                         {room.name}
                       </text>
@@ -605,18 +569,18 @@ export default function FloorMapping() {
               </svg>
             </div>
 
-            {/* Compass / Orientation Indicator Overlay */}
-            <div className="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-sm border border-slate-700/80 rounded-lg p-2 text-white flex flex-col items-center shadow-lg">
-              <Compass size={18} className="text-cyan-400 animate-pulse" />
-              <span className="text-[9px] font-bold text-slate-300 mt-0.5 tracking-wider">NORTH</span>
+            {/* Compass / Orientation Overlay */}
+            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-2 flex flex-col items-center shadow-md">
+              <Compass size={18} className="text-cipher-govblue" />
+              <span className="text-[9px] font-bold text-cipher-navy mt-0.5 tracking-wider">NORTH</span>
             </div>
 
-            {/* Scale Bar Legend */}
-            <div className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-sm border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-white flex items-center gap-2 shadow-lg text-[10px]">
-              <span className="text-slate-400 font-medium">Scale Metric:</span>
-              <div className="flex items-center gap-1 font-mono text-cyan-300 font-bold">
-                <span className="w-8 h-1 bg-cyan-400 inline-block rounded-sm"></span>
-                <span>5.0m CAD</span>
+            {/* Scale Metric Bar */}
+            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1.5 flex items-center gap-2 shadow-md text-[10px]">
+              <span className="text-slate-500 font-medium">CAD Scale:</span>
+              <div className="flex items-center gap-1 font-mono text-cipher-govblue font-bold">
+                <span className="w-8 h-1 bg-cipher-govblue inline-block rounded-sm"></span>
+                <span>5.0m</span>
               </div>
             </div>
           </div>
@@ -624,7 +588,7 @@ export default function FloorMapping() {
           {/* Blueprint Footer / Legend */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-cipher-border mt-3 text-xs">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[11px] font-bold text-cipher-navy">Cadastral Legend:</span>
+              <span className="text-[11px] font-bold text-cipher-navy">Legend:</span>
               <div className="flex items-center gap-1.5 text-[11px] text-cipher-muted">
                 <span className="w-3 h-3 rounded bg-blue-100 border border-blue-500"></span>
                 Classrooms
@@ -639,12 +603,12 @@ export default function FloorMapping() {
               </div>
               <div className="flex items-center gap-1.5 text-[11px] text-cipher-muted">
                 <span className="w-3 h-3 rounded bg-amber-100 border border-amber-500"></span>
-                Core / Staircase
+                Seminar / Core
               </div>
             </div>
 
             <span className="text-[11px] text-cipher-muted italic">
-              * Units correspond 1:1 with 3D Digital Twin extrusion
+              * Click any unit to update 3D ULPIN and property metadata
             </span>
           </div>
         </div>
@@ -656,14 +620,14 @@ export default function FloorMapping() {
       </div>
 
       {/* Floor Unit Directory Cards */}
-      <div className="gov-card p-4">
+      <div className="gov-card p-4 bg-white">
         <div className="flex items-center justify-between pb-2 border-b border-cipher-border mb-3">
           <div>
             <h3 className="text-sm font-bold text-cipher-navy">
-              {currentFloor.name} Unit Directory ({roomsToDisplay.length} Units)
+              {currentFloor.name} Registered Units ({roomsToDisplay.length} Units)
             </h3>
             <p className="text-xs text-cipher-muted">
-              Spatial cadastre records registered on this elevation level.
+              Click any cadastral card to inspect its generated 3D ULPIN and spatial coordinates.
             </p>
           </div>
           <span className="mono text-xs font-bold text-cipher-govblue bg-blue-50 border border-blue-200 px-2.5 py-1 rounded">
@@ -677,7 +641,7 @@ export default function FloorMapping() {
             return (
               <div
                 key={rm.id}
-                onClick={() => selectRoom(rm.id, { focus: true })}
+                onClick={() => handleUnitClick(rm)}
                 className={`p-3 rounded-xl border transition-all cursor-pointer ${
                   isSel
                     ? 'bg-blue-50 border-cipher-govblue shadow-subtle ring-2 ring-cipher-govblue/20'
