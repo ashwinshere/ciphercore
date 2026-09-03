@@ -19,6 +19,11 @@ export function AppProvider({ children }) {
   const [focusRequest, setFocusRequest] = useState(0); // increments to trigger camera focus
   const [resetRequest, setResetRequest] = useState(0); // increments to trigger camera reset
   const [showWelcome, setShowWelcome] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(false);
+
+  const toggleAutoRotate = useCallback(() => {
+    setAutoRotate((prev) => !prev);
+  }, []);
 
   const resetCamera = useCallback(() => {
     setSelectedRoomId(null);
@@ -68,6 +73,9 @@ export function AppProvider({ children }) {
     focusRequest,
     resetRequest,
     resetCamera,
+    autoRotate,
+    setAutoRotate,
+    toggleAutoRotate,
     showWelcome,
     setShowWelcome,
   };

@@ -23,6 +23,7 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
     visibleFloorIds,
     focusRequest,
     resetRequest,
+    autoRotate,
   } = useApp();
 
   const activeIsolatedFloor = isolateOverride !== undefined ? isolateOverride : isolatedFloorId;
@@ -89,7 +90,12 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
           );
         })}
 
-        <CameraController focusTarget={focusTarget} focusRequest={focusRequest} resetRequest={resetRequest} />
+        <CameraController
+          focusTarget={focusTarget}
+          focusRequest={focusRequest}
+          resetRequest={resetRequest}
+          autoRotate={autoRotate}
+        />
       </Canvas>
 
       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-xs border border-cipher-border rounded-md px-3 py-1.5 text-[11px] font-medium text-cipher-muted shadow-subtle pointer-events-none flex items-center gap-2">

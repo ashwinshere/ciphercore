@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Eye, EyeOff, Maximize2 } from 'lucide-react';
+import { RotateCcw, Eye, EyeOff, Maximize2, RotateCw } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import ExplodedViewController from './ExplodedViewController.jsx';
 
@@ -11,15 +11,31 @@ export default function BuildingControls() {
     visibleFloorIds,
     toggleFloorVisibility,
     resetCamera,
+    autoRotate,
+    toggleAutoRotate,
   } = useApp();
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
         onClick={resetCamera}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-cipher-border text-cipher-navy hover:bg-slate-50 hover:border-slate-300 transition-all shadow-subtle"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-cipher-border text-cipher-navy hover:bg-slate-50 hover:border-slate-300 transition-all shadow-subtle cursor-pointer"
+        title="Reset camera angle and target"
       >
         <RotateCcw size={13} className="text-cipher-govblue" /> Reset View
+      </button>
+
+      <button
+        onClick={toggleAutoRotate}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all shadow-subtle cursor-pointer ${
+          autoRotate
+            ? 'bg-cipher-govblue text-white border-cipher-govblue shadow-md'
+            : 'bg-white border-cipher-border text-cipher-navy hover:bg-slate-50'
+        }`}
+        title={autoRotate ? 'Pause 360° rotation' : 'Start 360° continuous rotation'}
+      >
+        <RotateCw size={13} className={`${autoRotate ? 'animate-spin text-white' : 'text-cipher-govblue'}`} />
+        <span>360° Rotate</span>
       </button>
 
       <ExplodedViewController />
@@ -27,7 +43,7 @@ export default function BuildingControls() {
       <button
         onClick={() => isolateFloor(null)}
         disabled={!isolatedFloorId}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-cipher-border text-cipher-navy hover:bg-slate-50 transition-all shadow-subtle disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-cipher-border text-cipher-navy hover:bg-slate-50 transition-all shadow-subtle disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
       >
         <Maximize2 size={13} className="text-cipher-govblue" /> All Floors
       </button>

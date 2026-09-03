@@ -3,10 +3,10 @@ import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
-const DEFAULT_TARGET = new THREE.Vector3(24, 8, 0);
+const DEFAULT_TARGET = new THREE.Vector3(26, 8, 0);
 const DEFAULT_POSITION = new THREE.Vector3(55, 34, 55);
 
-export default function CameraController({ focusTarget, focusRequest, resetRequest }) {
+export default function CameraController({ focusTarget, focusRequest, resetRequest, autoRotate = false }) {
   const controlsRef = useRef();
   const { camera } = useThree();
   const animTarget = useRef(null); // { pos: Vector3, look: Vector3 }
@@ -47,9 +47,16 @@ export default function CameraController({ focusTarget, focusRequest, resetReque
       makeDefault
       enableDamping
       dampingFactor={0.08}
-      minDistance={8}
-      maxDistance={140}
-      maxPolarAngle={Math.PI / 2.05}
+      minDistance={6}
+      maxDistance={200}
+      minPolarAngle={0}
+      maxPolarAngle={Math.PI}
+      minAzimuthAngle={-Infinity}
+      maxAzimuthAngle={Infinity}
+      enableRotate={true}
+      rotateSpeed={1.0}
+      autoRotate={autoRotate}
+      autoRotateSpeed={2.2}
       target={DEFAULT_TARGET}
     />
   );
