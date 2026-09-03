@@ -13,10 +13,16 @@ import ConflictDetection from './pages/ConflictDetection.jsx';
 import Registry from './pages/Registry.jsx';
 import Timeline from './pages/Timeline.jsx';
 import SatelliteView from './pages/SatelliteView.jsx';
+import SurveyorPortal from './pages/SurveyorPortal.jsx';
+import AIGeneratorWizard from './pages/AIGeneratorWizard.jsx';
+import PendingVerification from './pages/PendingVerification.jsx';
 
 const PAGES = {
   dashboard: Dashboard,
   'gis-explorer': GISExplorer,
+  'surveyor-portal': SurveyorPortal,
+  'ai-generator': AIGeneratorWizard,
+  'pending-verification': PendingVerification,
   explorer: Explorer,
   'floor-mapping': FloorMapping,
   'vertical-analysis': VerticalAnalysis,

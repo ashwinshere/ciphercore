@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Globe,
@@ -9,14 +9,20 @@ import {
   Database,
   History,
   Building2,
+  Sparkles,
+  ShieldCheck,
   Satellite,
+  UserCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { getSurveys, SURVEY_STATUS } from '../services/surveyStore.js';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Land & Property Overview', icon: LayoutDashboard },
-  { id: 'gis-explorer', label: 'GIS Explorer', icon: Globe, highlight: true },
-  { id: 'satellite-view', label: 'Satellite View', icon: Satellite },
+  { id: 'dashboard', label: 'GIS Land Map', icon: Globe },
+  { id: 'surveyor-portal', label: 'Surveyor Portal', icon: Sparkles, highlight: true },
+  { id: 'ai-generator', label: 'AI Building Generator', icon: Layers, isNew: true },
+  { id: 'pending-verification', label: 'Pending Verification', icon: ShieldCheck, hasPendingBadge: true },
   { id: 'explorer', label: '3D Building Explorer', icon: Box },
   { id: 'floor-mapping', label: 'Building & Floor Plans', icon: Layers },
   { id: 'vertical-analysis', label: 'Vertical Stack Structure', icon: ArrowUpDown },
@@ -28,6 +34,18 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { currentPage, setCurrentPage, viewMode, setViewMode, conflicts, selectedProperty } = useApp();
   const conflictCount = conflicts.length;
+
+  const [pendingSurveysCount, setPendingSurveysCount] = useState(1);
+
+  useEffect(() => {
+    try {
+      const surveys = getSurveys();
+      const count = surveys.filter((s) => s.status === SURVEY_STATUS.PENDING_VERIFICATION).length;
+      setPendingSurveysCount(count);
+    } catch {
+      // ignore
+    }
+  }, [currentPage]);
 
   const handleNavClick = (id) => {
     if (id === 'dashboard') {
@@ -49,7 +67,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 flex-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           let active = currentPage === item.id;
@@ -83,7 +101,19 @@ export default function Sidebar() {
 
               {item.highlight && !active && (
                 <span className="text-[9px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 px-1.5 py-0.2 rounded">
-                  NEW
+                  PORTAL
+                </span>
+              )}
+
+              {item.isNew && !active && (
+                <span className="text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.2 rounded">
+                  AI 3D
+                </span>
+              )}
+
+              {item.hasPendingBadge && pendingSurveysCount > 0 && (
+                <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded-full">
+                  {pendingSurveysCount}
                 </span>
               )}
 
@@ -108,7 +138,7 @@ export default function Sidebar() {
         <div className="p-3 rounded-lg bg-slate-50 border border-cipher-border text-xs leading-relaxed">
           <div className="flex items-center gap-1.5 font-semibold text-cipher-navy text-[11px] mb-1">
             <Building2 size={13} className="text-cipher-govblue" />
-            <span>Active Property</span>
+            <span>Active Cadastre</span>
           </div>
           <p className="text-[11px] text-cipher-navy font-bold truncate">
             {selectedProperty?.name || 'RV Block (Pilot)'}

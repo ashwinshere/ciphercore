@@ -247,12 +247,54 @@ export default function Login() {
               </>
             ) : (
               <>
-                <span>Sign In to VERTEX</span>
+                <span>Sign In to CIPHERCORE</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </>
             )}
           </button>
         </form>
+
+        {/* Quick Role Fillers */}
+        <div className="mt-5 pt-4 border-t border-slate-800 text-center">
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Quick Role Demo Sign In
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('surveyor');
+                setPassword('surveyor123');
+                setCaptchaInput(actualCaptcha || 'ABC123');
+              }}
+              className="px-2 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/40 text-blue-300 hover:bg-blue-900/60 font-semibold text-[11px] transition-all"
+            >
+              Surveyor
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('officer');
+                setPassword('officer123');
+                setCaptchaInput(actualCaptcha || 'ABC123');
+              }}
+              className="px-2 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60 font-semibold text-[11px] transition-all"
+            >
+              Officer
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('admin');
+                setPassword('admin123');
+                setCaptchaInput(actualCaptcha || 'ABC123');
+              }}
+              className="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800 font-semibold text-[11px] transition-all"
+            >
+              Admin
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
