@@ -18,7 +18,10 @@ export function AppProvider({ children }) {
   }, [selectedProperty]);
 
   const allRooms = useMemo(() => flattenRooms(buildingData), [buildingData]);
-  const conflicts = useMemo(() => detectAllConflicts(allRooms), [allRooms]);
+  const conflicts = useMemo(
+    () => detectAllConflicts(allRooms, buildingData.boundary, buildingData.building.name),
+    [allRooms, buildingData]
+  );
 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [hoveredRoomId, setHoveredRoomId] = useState(null);

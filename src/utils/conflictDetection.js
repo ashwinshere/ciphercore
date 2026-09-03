@@ -7,7 +7,6 @@
 // ============================================================================
 
 import { rectanglesOverlap, overlapFraction, isWithinBoundary } from './geometry.js';
-import { BUILDING_BOUNDARY } from '../data/buildingData.js';
 import { VERTICAL_ALIGNMENT_THRESHOLD } from './verticalAnalysis.js';
 
 let _counter = 0;
@@ -19,15 +18,17 @@ function conflictId(prefix) {
 /**
  * Run every conflict check over the flattened room list.
  * @param {Array<object>} allRooms - flattened rooms (see propertyId.flattenRooms)
+ * @param {object} buildingBoundary - bounding box { xMin, xMax, yMin, yMax }
+ * @param {string} buildingName - name of active building
  * @returns {Array<object>} conflicts: { id, type, severity, propertyId, description }
  */
-export function detectAllConflicts(allRooms) {
+export function detectAllConflicts(allRooms, buildingBoundary, buildingName = 'Building') {
   _counter = 0;
   const conflicts = [];
 
   conflicts.push(...detectDuplicateIds(allRooms));
   conflicts.push(...detectMissingIds(allRooms));
-  conflicts.push(...detectOutOfBounds(allRooms));
+  conflicts.push(...detectOutOfBounds(allRooms, buildingBoundary, buildingName));
   conflicts.push(...detectHorizontalOverlaps(allRooms));
   conflicts.push(...detectSuspiciousVerticalOverlaps(allRooms));
 
@@ -72,16 +73,18 @@ export function detectMissingIds(allRooms) {
 }
 
 // 3. Invalid room outside building boundary --------------------------------
-export function detectOutOfBounds(allRooms) {
+export function detectOutOfBounds(allRooms, boundary, buildingName = 'Building') {
   const conflicts = [];
+  if (!boundary) return conflicts;
+
   allRooms.forEach((room) => {
-    if (!isWithinBoundary(room, BUILDING_BOUNDARY)) {
+    if (!isWithinBoundary(room, boundary)) {
       conflicts.push({
         id: conflictId('OOB'),
         type: 'Room Outside Building Boundary',
         severity: 'critical',
         propertyId: room.id,
-        description: `${room.name} footprint extends beyond the defined RV Block boundary on ${room.floorName}.`,
+        description: `${room.name} footprint extends beyond the defined ${buildingName} boundary on ${room.floorName}.`,
       });
     }
   });
@@ -121,8 +124,7 @@ export function detectSuspiciousVerticalOverlaps(allRooms) {
       if (a.floorId === b.floorId) continue; // handled by horizontal check
       const frac = overlapFraction(a, b);
       // "Suspicious": some overlap exists, but not enough to count as a
-      // clean vertical stack relationship — likely a misaligned prototype
-      // coordinate rather than a genuine stacked room.
+      // clean vertical stack relationship
       if (frac > 0.05 && frac < VERTICAL_ALIGNMENT_THRESHOLD) {
         const key = [a.id, b.id].sort().join('::');
         if (flagged.has(key)) continue;
