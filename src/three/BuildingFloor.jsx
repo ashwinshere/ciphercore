@@ -44,8 +44,8 @@ export default function BuildingFloor({
   return (
     <group ref={groupRef} position={[0, explodedOffset, 0]}>
       <group position={[0, floor.elevation, 0]}>
-        {/* Structural Architectural Floor Slab (Clean Light Stone / Concrete Finish) */}
-        <mesh position={[0, -0.1, 0]} receiveShadow castShadow={!isDimmed}>
+        {/* Structural Architectural Floor Slab - raycast disabled so it never blocks room selection */}
+        <mesh position={[0, -0.1, 0]} receiveShadow castShadow={!isDimmed} raycast={() => null}>
           <boxGeometry args={[width + 0.4, 0.2, depth + 0.4]} />
           <meshStandardMaterial
             color={isDimmed ? '#E2E8F0' : '#FFFFFF'}
@@ -60,7 +60,7 @@ export default function BuildingFloor({
 
         {/* Central Circulation Hallway Runner Floor */}
         {!wireframeMode && (
-          <mesh position={[0, 0.01, 0]} receiveShadow>
+          <mesh position={[0, 0.01, 0]} receiveShadow raycast={() => null}>
             <boxGeometry args={[width - 1, 0.02, 3]} />
             <meshStandardMaterial
               color={isDimmed ? '#F1F5F9' : '#E0F2FE'}
@@ -73,7 +73,7 @@ export default function BuildingFloor({
 
         {/* Outer Perimeter Architectural Balcony / Fascia Trim */}
         {!wireframeMode && (
-          <mesh position={[0, -0.05, 0]}>
+          <mesh position={[0, -0.05, 0]} raycast={() => null}>
             <boxGeometry args={[width + 0.6, 0.1, depth + 0.6]} />
             <meshStandardMaterial
               color="#0284C7"
@@ -87,7 +87,7 @@ export default function BuildingFloor({
         {isTopFloor && !wireframeMode && (
           <group position={[0, floorHeight, 0]}>
             {/* Rooftop Slab */}
-            <mesh position={[0, 0.1, 0]} receiveShadow castShadow={!isDimmed}>
+            <mesh position={[0, 0.1, 0]} receiveShadow castShadow={!isDimmed} raycast={() => null}>
               <boxGeometry args={[width + 0.4, 0.2, depth + 0.4]} />
               <meshStandardMaterial
                 color="#F8FAFC"
@@ -98,24 +98,24 @@ export default function BuildingFloor({
               <Edges scale={1.001} color="#94A3B8" />
             </mesh>
             {/* Perimeter Parapet Wall */}
-            <mesh position={[0, 0.45, (depth + 0.2) / 2]}>
+            <mesh position={[0, 0.45, (depth + 0.2) / 2]} raycast={() => null}>
               <boxGeometry args={[width + 0.4, 0.5, 0.2]} />
               <meshStandardMaterial color="#E2E8F0" />
             </mesh>
-            <mesh position={[0, 0.45, -(depth + 0.2) / 2]}>
+            <mesh position={[0, 0.45, -(depth + 0.2) / 2]} raycast={() => null}>
               <boxGeometry args={[width + 0.4, 0.5, 0.2]} />
               <meshStandardMaterial color="#E2E8F0" />
             </mesh>
-            <mesh position={[(width + 0.2) / 2, 0.45, 0]}>
+            <mesh position={[(width + 0.2) / 2, 0.45, 0]} raycast={() => null}>
               <boxGeometry args={[0.2, 0.5, depth]} />
               <meshStandardMaterial color="#E2E8F0" />
             </mesh>
-            <mesh position={[-(width + 0.2) / 2, 0.45, 0]}>
+            <mesh position={[-(width + 0.2) / 2, 0.45, 0]} raycast={() => null}>
               <boxGeometry args={[0.2, 0.5, depth]} />
               <meshStandardMaterial color="#E2E8F0" />
             </mesh>
             {/* Rooftop Elevator / Stair Headroom Penthouse */}
-            <mesh position={[width / 2 - 8, 1.2, 0]} castShadow receiveShadow>
+            <mesh position={[width / 2 - 8, 1.2, 0]} castShadow receiveShadow raycast={() => null}>
               <boxGeometry args={[7, 2, 4]} />
               <meshStandardMaterial color="#334155" roughness={0.4} />
               <Edges scale={1.001} color="#64748B" />
@@ -133,6 +133,7 @@ export default function BuildingFloor({
           rotation={[0, Math.PI / 2, 0]}
           fillOpacity={isDimmed ? 0.2 : 0.9}
           fontWeight="bold"
+          raycast={() => null}
         >
           {floor.shortName.toUpperCase()}
         </Text>

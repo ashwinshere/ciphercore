@@ -71,7 +71,7 @@ export default function BuildingScene({ isolateOverride, height = '100%', showSt
         <directionalLight position={[-50, 40, -50]} intensity={0.5} color="#BAE6FD" />
 
         {/* Architectural Ground Plane & Shadow Receiver */}
-        <mesh position={[0, -0.22, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <mesh position={[0, -0.22, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow raycast={() => null}>
           <planeGeometry args={[500, 500]} />
           <shadowMaterial opacity={0.15} />
         </mesh>

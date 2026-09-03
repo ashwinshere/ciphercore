@@ -83,7 +83,6 @@ export default function PropertyRoom({
   onUnhover,
 }) {
   const meshRef = useRef();
-  const pointerDownPos = useRef({ x: 0, y: 0 });
   const { wireframeMode, selectRoom } = useApp();
 
   const cfg = TYPE_CONFIG[room.type] || TYPE_CONFIG['Classroom'];
@@ -111,26 +110,26 @@ export default function PropertyRoom({
   const opacity = dimmed
     ? 0.12
     : isSelected
-    ? 0.88
+    ? 0.92
     : isHovered
-    ? 0.65
-    : isStackMember
     ? 0.72
-    : 0.45;
+    : isStackMember
+    ? 0.75
+    : 0.48;
 
   useFrame(() => {
     if (!meshRef.current) return;
-    const targetScale = isSelected ? 1.025 : isHovered ? 1.015 : 1;
+    const targetScale = isSelected ? 1.03 : isHovered ? 1.015 : 1;
     meshRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
-      0.15
+      0.18
     );
   });
 
-  const handleTriggerSelect = (e) => {
-    e?.stopPropagation?.();
+  const handleSelect = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     selectRoom(room.id, { focus: true });
-    onSelect?.(room);
+    if (onSelect) onSelect(room);
   };
 
   return (
@@ -138,17 +137,8 @@ export default function PropertyRoom({
       {/* Main Room Volume with Architectural Glass / Facade styling */}
       <mesh
         ref={meshRef}
-        onPointerDown={(e) => {
-          pointerDownPos.current = { x: e.clientX || 0, y: e.clientY || 0 };
-        }}
-        onPointerUp={(e) => {
-          const dx = Math.abs((e.clientX || 0) - pointerDownPos.current.x);
-          const dy = Math.abs((e.clientY || 0) - pointerDownPos.current.y);
-          if (dx < 8 && dy < 8) {
-            handleTriggerSelect(e);
-          }
-        }}
-        onClick={handleTriggerSelect}
+        onClick={handleSelect}
+        onPointerDown={handleSelect}
         onPointerOver={(e) => {
           e.stopPropagation();
           onHover?.(room);
@@ -171,7 +161,7 @@ export default function PropertyRoom({
           opacity={opacity}
           wireframe={wireframeMode}
           emissive={isSelected ? '#0284C7' : isHovered ? '#38BDF8' : '#000000'}
-          emissiveIntensity={isSelected ? 0.45 : isHovered ? 0.2 : 0}
+          emissiveIntensity={isSelected ? 0.55 : isHovered ? 0.25 : 0}
         />
 
         {/* Clean Architectural Boundary Chamfer */}
@@ -182,9 +172,9 @@ export default function PropertyRoom({
         />
       </mesh>
 
-      {/* Interior Floor Plate Tile (Architectural Unit Finish) */}
+      {/* Interior Floor Plate Tile (Architectural Unit Finish - raycast disabled) */}
       {!dimmed && !wireframeMode && (
-        <mesh position={[0, -room.height / 2 + 0.05, 0]} receiveShadow>
+        <mesh position={[0, -room.height / 2 + 0.05, 0]} receiveShadow raycast={() => null}>
           <boxGeometry args={[room.width - 0.2, 0.06, room.depth - 0.2]} />
           <meshStandardMaterial
             color={isSelected ? '#BAE6FD' : isHovered ? '#E0F2FE' : '#F8FAFC'}
@@ -193,9 +183,9 @@ export default function PropertyRoom({
         </mesh>
       )}
 
-      {/* Ceiling Trim Edge */}
+      {/* Ceiling Trim Edge (raycast disabled) */}
       {!dimmed && !wireframeMode && (
-        <mesh position={[0, room.height / 2 - 0.03, 0]}>
+        <mesh position={[0, room.height / 2 - 0.03, 0]} raycast={() => null}>
           <boxGeometry args={[room.width - 0.1, 0.04, room.depth - 0.1]} />
           <meshStandardMaterial color="#E2E8F0" opacity={0.6} transparent />
         </mesh>
@@ -208,9 +198,10 @@ export default function PropertyRoom({
           center
           distanceFactor={24}
           occlude={false}
-          style={{ pointerEvents: 'none' }}
+          pointerEvents="none"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
         >
-          <div className="fade-in bg-white/95 backdrop-blur-md rounded-xl px-3 py-2 text-xs whitespace-nowrap shadow-xl border border-cipher-border text-left ring-2 ring-cipher-govblue/30 select-none">
+          <div className="fade-in bg-white/95 backdrop-blur-md rounded-xl px-3 py-2 text-xs whitespace-nowrap shadow-xl border border-cipher-border text-left ring-2 ring-cipher-govblue/30 select-none pointer-events-none">
             <div className="flex items-center justify-between gap-3 mb-1">
               <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${cfg.tag}`}>
                 {room.name}
