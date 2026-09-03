@@ -15,32 +15,33 @@ export default function CameraController({ building, focusTarget, focusRequest, 
   const height = building?.buildingHeightM || 15;
 
   const defaultTarget = useMemo(() => {
-    return new THREE.Vector3(0, height / 2.5, 0);
+    return new THREE.Vector3(0, height * 0.45, 0);
   }, [height]);
 
   const defaultPosition = useMemo(() => {
-    const radius = Math.hypot(width, depth, height);
-    return new THREE.Vector3(radius * 0.9, height * 1.4, radius * 0.9);
+    const span = Math.max(width, depth);
+    const dist = span * 1.15;
+    return new THREE.Vector3(dist, height * 1.6 + 15, dist);
   }, [width, depth, height]);
 
-  // Handle Preset Camera Angles
+  // Handle Preset Camera Angles with smooth architectural perspectives
   useEffect(() => {
-    const radius = Math.hypot(width, depth, height);
-    const look = new THREE.Vector3(0, height / 2, 0);
+    const span = Math.max(width, depth);
+    const look = new THREE.Vector3(0, height * 0.45, 0);
 
     if (cameraPreset === 'top') {
       animTarget.current = {
-        pos: new THREE.Vector3(0, radius * 1.5, 0.001),
+        pos: new THREE.Vector3(0.001, span * 1.65, 0),
         look: new THREE.Vector3(0, 0, 0)
       };
     } else if (cameraPreset === 'front') {
       animTarget.current = {
-        pos: new THREE.Vector3(0, height * 0.8, radius * 1.25),
+        pos: new THREE.Vector3(0, height * 0.75 + 8, span * 1.35),
         look
       };
     } else if (cameraPreset === 'side') {
       animTarget.current = {
-        pos: new THREE.Vector3(radius * 1.25, height * 0.8, 0),
+        pos: new THREE.Vector3(span * 1.35, height * 0.75 + 8, 0),
         look
       };
     } else if (cameraPreset === 'iso') {
@@ -51,6 +52,7 @@ export default function CameraController({ building, focusTarget, focusRequest, 
     }
   }, [cameraPreset, width, depth, height, defaultPosition, defaultTarget]);
 
+  // Initial camera placement
   useEffect(() => {
     camera.position.copy(defaultPosition);
     if (controlsRef.current) {
@@ -59,25 +61,33 @@ export default function CameraController({ building, focusTarget, focusRequest, 
     }
   }, [camera, defaultPosition, defaultTarget]);
 
+  // Reset request handler
   useEffect(() => {
     if (resetRequest === undefined || resetRequest === 0) return;
     animTarget.current = { pos: defaultPosition.clone(), look: defaultTarget.clone() };
   }, [resetRequest, defaultPosition, defaultTarget]);
 
+  // Comfortable, contextual framing on unit selection (smooth & never over-zoomed)
   useEffect(() => {
     if (!focusTarget) return;
     const look = new THREE.Vector3(focusTarget.x, focusTarget.y, focusTarget.z);
-    const dir = new THREE.Vector3(1, 0.65, 1).normalize();
-    const pos = look.clone().add(dir.multiplyScalar(22));
+    const dir = new THREE.Vector3(1, 0.55, 1).normalize();
+    // Balanced framing distance so user retains full spatial context
+    const framingDistance = Math.max(38, Math.min(55, Math.max(width, depth) * 0.65));
+    const pos = look.clone().add(dir.multiplyScalar(framingDistance));
     animTarget.current = { pos, look };
-  }, [focusRequest, focusTarget]);
+  }, [focusRequest, focusTarget, width, depth]);
 
+  // Smooth lerp frame loop
   useFrame(() => {
     if (!controlsRef.current) return;
     if (animTarget.current) {
-      camera.position.lerp(animTarget.current.pos, 0.08);
-      controlsRef.current.target.lerp(animTarget.current.look, 0.08);
-      if (camera.position.distanceTo(animTarget.current.pos) < 0.05) {
+      camera.position.lerp(animTarget.current.pos, 0.055);
+      controlsRef.current.target.lerp(animTarget.current.look, 0.055);
+      if (
+        camera.position.distanceTo(animTarget.current.pos) < 0.1 &&
+        controlsRef.current.target.distanceTo(animTarget.current.look) < 0.1
+      ) {
         animTarget.current = null;
       }
     }
@@ -89,10 +99,14 @@ export default function CameraController({ building, focusTarget, focusRequest, 
       ref={controlsRef}
       makeDefault
       enableDamping
-      dampingFactor={0.08}
-      minDistance={6}
-      maxDistance={350}
-      maxPolarAngle={Math.PI / 2.01}
+      dampingFactor={0.06}
+      rotateSpeed={0.65}
+      zoomSpeed={0.7}
+      panSpeed={0.75}
+      minDistance={16}
+      maxDistance={220}
+      minPolarAngle={Math.PI / 16}
+      maxPolarAngle={Math.PI / 2.08}
       target={defaultTarget}
     />
   );
