@@ -18,13 +18,19 @@ export function AppProvider({ children }) {
   }, [selectedProperty]);
 
   const allRooms = useMemo(() => flattenRooms(buildingData), [buildingData]);
-  const conflicts = useMemo(() => detectAllConflicts(allRooms), [allRooms]);
+  const conflicts = useMemo(
+    () => detectAllConflicts(allRooms, buildingData.boundary, buildingData.building.name),
+    [allRooms, buildingData]
+  );
 
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [hoveredRoomId, setHoveredRoomId] = useState(null);
   const [explodedView, setExplodedView] = useState(false);
+  const [explodeDistance, setExplodeDistance] = useState(7);
   const [isolatedFloorId, setIsolatedFloorId] = useState(null);
   const [visibleFloorIds, setVisibleFloorIds] = useState(() => buildingData.floors.map((f) => f.id));
+  const [cameraPreset, setCameraPreset] = useState('iso');
+  const [wireframeMode, setWireframeMode] = useState(false);
   
   React.useEffect(() => {
     setVisibleFloorIds(buildingData.floors.map((f) => f.id));
@@ -109,6 +115,8 @@ export function AppProvider({ children }) {
     setHoveredRoomId,
     explodedView,
     setExplodedView,
+    explodeDistance,
+    setExplodeDistance,
     isolatedFloorId,
     isolateFloor,
     visibleFloorIds,
@@ -118,6 +126,10 @@ export function AppProvider({ children }) {
     focusRequest,
     resetRequest,
     resetCamera,
+    cameraPreset,
+    setCameraPreset,
+    wireframeMode,
+    setWireframeMode,
     showWelcome,
     setShowWelcome,
   };

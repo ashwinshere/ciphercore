@@ -101,17 +101,17 @@ body {
   animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* ── Satellite Map Building Hotspots ── */
-.leaflet-interactive {
-  cursor: pointer !important;
-}
-
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-8px); }
   40%, 80% { transform: translateX(8px); }
 }
+
 .animate-shake {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
+/* Satellite Map Building Hotspots */
+.leaflet-interactive {
+  cursor: pointer !important;
+}

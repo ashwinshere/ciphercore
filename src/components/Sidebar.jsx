@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard,
+  Globe,
   Box,
   Layers,
   ArrowUpDown,
@@ -13,7 +14,8 @@ import { useApp } from '../context/AppContext.jsx';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Land & Property Overview', icon: LayoutDashboard },
-  { id: 'explorer', label: '3D Property Map', icon: Box },
+  { id: 'gis-explorer', label: 'GIS Explorer', icon: Globe, highlight: true },
+  { id: 'explorer', label: '3D Building Explorer', icon: Box },
   { id: 'floor-mapping', label: 'Building & Floor Plans', icon: Layers },
   { id: 'vertical-analysis', label: 'Vertical Stack Structure', icon: ArrowUpDown },
   { id: 'conflict-detection', label: 'Spatial Audit & QA', icon: ShieldAlert },
@@ -29,6 +31,9 @@ export default function Sidebar() {
     if (id === 'dashboard') {
       setCurrentPage('dashboard');
       setViewMode('map');
+    } else if (id === 'explorer') {
+      setCurrentPage('explorer');
+      setViewMode('3d');
     } else {
       setCurrentPage(id);
     }
@@ -45,7 +50,11 @@ export default function Sidebar() {
       <div className="flex flex-col gap-1 flex-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const active = currentPage === item.id;
+          let active = currentPage === item.id;
+
+          if (currentPage === 'dashboard') {
+            if (viewMode === 'map' && item.id === 'dashboard') active = true;
+          }
 
           return (
             <button
@@ -65,10 +74,16 @@ export default function Sidebar() {
               <span className="flex items-center gap-2.5 truncate">
                 <Icon
                   size={16}
-                  className={active ? 'text-cipher-govblue' : 'text-slate-400'}
+                  className={active ? 'text-cipher-govblue' : item.highlight ? 'text-blue-600' : 'text-slate-400'}
                 />
                 <span className="truncate">{item.label}</span>
               </span>
+
+              {item.highlight && !active && (
+                <span className="text-[9px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 px-1.5 py-0.2 rounded">
+                  NEW
+                </span>
+              )}
 
               {item.id === 'conflict-detection' && conflictCount > 0 && (
                 <span className="text-[10px] font-bold bg-amber-50 text-cipher-warning border border-amber-200 px-1.5 py-0.5 rounded-full">
@@ -88,11 +103,11 @@ export default function Sidebar() {
             <span>Active Property</span>
           </div>
           <p className="text-[11px] text-cipher-navy font-bold truncate">
-            {selectedProperty?.name || 'Saranathan Campus'}
+            {selectedProperty?.name || 'RV Block (Pilot)'}
           </p>
           <div className="mt-2 pt-2 border-t border-cipher-border/60 flex items-center justify-between text-[10px] text-cipher-muted">
-            <span>ULPIN:</span>
-            <span className="font-semibold text-cipher-govblue mono">{selectedProperty?.ulpin2D}</span>
+            <span>2D ULPIN:</span>
+            <span className="font-semibold text-cipher-govblue mono">{selectedProperty?.ulpin2D || '29-01-001-000123'}</span>
           </div>
         </div>
       </div>

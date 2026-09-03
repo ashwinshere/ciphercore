@@ -1,11 +1,11 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AppProvider, useApp } from './context/AppContext.jsx';
-import WelcomeModal from './components/WelcomeModal.jsx';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import GISExplorer from './pages/GISExplorer.jsx';
 import Explorer from './pages/Explorer.jsx';
 import FloorMapping from './pages/FloorMapping.jsx';
 import VerticalAnalysis from './pages/VerticalAnalysis.jsx';
@@ -15,6 +15,7 @@ import Timeline from './pages/Timeline.jsx';
 
 const PAGES = {
   dashboard: Dashboard,
+  'gis-explorer': GISExplorer,
   explorer: Explorer,
   'floor-mapping': FloorMapping,
   'vertical-analysis': VerticalAnalysis,
@@ -29,7 +30,6 @@ function Layout() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cipher-bg text-cipher-text gis-grid-bg">
-      <WelcomeModal />
       <Navbar />
       <div className="flex-1 flex overflow-hidden min-h-0">
         <Sidebar />
@@ -64,4 +64,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
