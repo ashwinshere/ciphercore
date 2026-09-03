@@ -1,31 +1,44 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
-const DEFAULT_TARGET = new THREE.Vector3(26, 8, 0);
-const DEFAULT_POSITION = new THREE.Vector3(55, 34, 55);
-
-export default function CameraController({ focusTarget, focusRequest, resetRequest, autoRotate = false }) {
+export default function CameraController({ building, focusTarget, focusRequest, resetRequest, autoRotate = false }) {
   const controlsRef = useRef();
   const { camera } = useThree();
-  const animTarget = useRef(null); // { pos: Vector3, look: Vector3 }
+  const animTarget = useRef(null);
 
-  // Set initial camera position once.
+  const width = building?.footprintWidthM || 60;
+  const depth = building?.footprintDepthM || 20;
+  const height = building?.buildingHeightM || 15;
+
+  const defaultTarget = useMemo(() => {
+    return new THREE.Vector3(0, height / 2.5, 0);
+  }, [height]);
+
+  const defaultPosition = useMemo(() => {
+    const radius = Math.hypot(width, depth, height);
+    return new THREE.Vector3(radius * 0.9, height * 1.4, radius * 0.9);
+  }, [width, depth, height]);
+
   useEffect(() => {
-    camera.position.copy(DEFAULT_POSITION);
-  }, [camera]);
+    camera.position.copy(defaultPosition);
+    if (controlsRef.current) {
+      controlsRef.current.target.copy(defaultTarget);
+      controlsRef.current.update();
+    }
+  }, [camera, defaultPosition, defaultTarget]);
 
   useEffect(() => {
     if (resetRequest === undefined) return;
-    animTarget.current = { pos: DEFAULT_POSITION.clone(), look: DEFAULT_TARGET.clone() };
-  }, [resetRequest]);
+    animTarget.current = { pos: defaultPosition.clone(), look: defaultTarget.clone() };
+  }, [resetRequest, defaultPosition, defaultTarget]);
 
   useEffect(() => {
     if (!focusTarget) return;
     const look = new THREE.Vector3(focusTarget.x, focusTarget.y, focusTarget.z);
     const dir = new THREE.Vector3(1, 0.65, 1).normalize();
-    const pos = look.clone().add(dir.multiplyScalar(16));
+    const pos = look.clone().add(dir.multiplyScalar(18));
     animTarget.current = { pos, look };
   }, [focusRequest]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -48,18 +61,15 @@ export default function CameraController({ focusTarget, focusRequest, resetReque
       enableDamping
       dampingFactor={0.08}
       minDistance={6}
-      maxDistance={200}
-      minPolarAngle={0}
-      maxPolarAngle={Math.PI}
+      maxDistance={250}
+      maxPolarAngle={Math.PI / 2.02}
       minAzimuthAngle={-Infinity}
       maxAzimuthAngle={Infinity}
       enableRotate={true}
       rotateSpeed={1.0}
       autoRotate={autoRotate}
       autoRotateSpeed={2.2}
-      target={DEFAULT_TARGET}
+      target={defaultTarget}
     />
   );
 }
-
-export { DEFAULT_TARGET, DEFAULT_POSITION };
