@@ -1,8 +1,10 @@
 import React from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AppProvider, useApp } from './context/AppContext.jsx';
+import WelcomeModal from './components/WelcomeModal.jsx';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
-import WelcomeModal from './components/WelcomeModal.jsx';
+import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Explorer from './pages/Explorer.jsx';
 import FloorMapping from './pages/FloorMapping.jsx';
@@ -29,10 +31,10 @@ function Layout() {
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cipher-bg text-cipher-text gis-grid-bg">
       <WelcomeModal />
       <Navbar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="max-w-7xl mx-auto h-full">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 min-w-0">
+          <div className="max-w-7xl mx-auto h-full min-h-0">
             <Page />
           </div>
         </main>
@@ -41,10 +43,25 @@ function Layout() {
   );
 }
 
-export default function App() {
+function MainRoot() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
   return (
     <AppProvider>
       <Layout />
     </AppProvider>
   );
 }
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainRoot />
+    </AuthProvider>
+  );
+}
+

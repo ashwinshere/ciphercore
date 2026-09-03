@@ -1,10 +1,12 @@
 import React from 'react';
-import { Layers, ShieldCheck, MapPin, Building, UserCheck } from 'lucide-react';
+import { Layers, ShieldCheck, MapPin, Building, Box, Building2, ChevronDown, Wifi, LogOut, UserCheck } from 'lucide-react';
 import SearchBar from './SearchBar.jsx';
 import { useApp } from '../context/AppContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
   const { buildingData, setShowWelcome } = useApp();
+  const { user, logout } = useAuth();
 
   return (
     <header className="h-16 shrink-0 bg-white border-b border-cipher-border flex items-center px-6 gap-6 z-30 shadow-subtle">
@@ -57,16 +59,49 @@ export default function Navbar() {
           Registry Active
         </div>
 
-        <div className="flex items-center gap-2.5 pl-3 border-l border-cipher-border">
-          <div className="w-8 h-8 rounded-full bg-cipher-navy/5 border border-cipher-border flex items-center justify-center text-cipher-navy text-xs font-bold">
-            GA
+        {user ? (
+          <div className="flex items-center gap-2 pl-3 border-l border-cipher-border">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-full ${user.avatarColor ? 'bg-gradient-to-br ' + user.avatarColor : 'bg-cipher-navy text-white'} border border-cipher-border flex items-center justify-center text-xs font-bold shadow-sm`}>
+                {user.username ? user.username[0].toUpperCase() : 'U'}
+              </div>
+              <div className="hidden md:block text-left">
+                <div className="text-xs font-semibold text-cipher-navy leading-tight flex items-center gap-1.5">
+                  {user.name || user.username}
+                  {user.badge && (
+                    <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-blue-50 text-cipher-govblue border border-blue-200">
+                      {user.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-cipher-muted leading-tight">
+                  {user.role}
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={logout}
+              title="Logout"
+              className="ml-2 flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-red-50 text-red-600 border border-transparent hover:border-red-200 text-xs font-medium transition-colors cursor-pointer"
+            >
+              <LogOut size={13} />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
-          <div className="hidden md:block text-left">
-            <div className="text-xs font-semibold text-cipher-navy leading-tight">Gov Admin</div>
-            <div className="text-[10px] text-cipher-muted leading-tight">Survey &amp; Records</div>
+        ) : (
+          <div className="flex items-center gap-2.5 pl-3 border-l border-cipher-border">
+            <div className="w-8 h-8 rounded-full bg-cipher-navy/5 border border-cipher-border flex items-center justify-center text-cipher-navy text-xs font-bold">
+              GA
+            </div>
+            <div className="hidden md:block text-left">
+              <div className="text-xs font-semibold text-cipher-navy leading-tight">Gov Admin</div>
+              <div className="text-[10px] text-cipher-muted leading-tight">Survey &amp; Records</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
 }
+

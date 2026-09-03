@@ -31,8 +31,8 @@ export function AppProvider({ children }) {
   }, [buildingData]);
 
   const [timelineYear, setTimelineYear] = useState(TIMELINE_YEARS[TIMELINE_YEARS.length - 1]);
-  const [focusRequest, setFocusRequest] = useState(0);
-  const [resetRequest, setResetRequest] = useState(0);
+  const [focusRequest, setFocusRequest] = useState(0); // increments to trigger camera focus
+  const [resetRequest, setResetRequest] = useState(0); // increments to trigger camera reset
   const [showWelcome, setShowWelcome] = useState(false);
 
   // Select property on map and directly open 3D detail view
