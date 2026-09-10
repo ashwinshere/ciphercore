@@ -3,6 +3,22 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 // Default pre-configured accounts
 export const DEFAULT_USERS = [
   {
+    username: 'surveyor',
+    password: 'surveyor123',
+    name: 'R. Kumar',
+    role: 'Authorized Cadastral Surveyor',
+    badge: 'SURV-TN-409',
+    avatarColor: 'from-blue-600 to-indigo-700',
+  },
+  {
+    username: 'officer',
+    password: 'officer123',
+    name: 'T. Anand, IAS',
+    role: 'Land Verification Officer',
+    badge: 'GOV-OFFICER-01',
+    avatarColor: 'from-emerald-600 to-teal-700',
+  },
+  {
     username: 'admin',
     password: 'admin123',
     name: 'Administrator',

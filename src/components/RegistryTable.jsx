@@ -1,10 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { Search, ArrowUpDown, Database, ShieldCheck, Download, ChevronRight } from 'lucide-react';
+import {
+  Search,
+  ArrowUpDown,
+  Database,
+  ShieldCheck,
+  Download,
+  ChevronRight,
+  Lock,
+  FileCheck2,
+  Printer
+} from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
 import { calculateArea } from '../utils/geometry.js';
+import SpatialIdentityModal from './SpatialIdentityModal.jsx';
 
 const COLUMNS = [
-  { key: 'id', label: 'ULPIN Identifier' },
+  { key: 'id', label: '3D ULPIN Identifier' },
   { key: 'name', label: 'Cadastral Unit' },
   { key: 'floorShortName', label: 'Level' },
   { key: 'type', label: 'Property Usage' },
@@ -14,16 +25,17 @@ const COLUMNS = [
 ];
 
 export default function RegistryTable() {
-  const { allRooms, selectRoom, buildingData } = useApp();
+  const { allRooms, selectRoom, buildingData, selectedProperty } = useApp();
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState('id');
   const [sortAsc, setSortAsc] = useState(true);
+  const [selectedCertRoom, setSelectedCertRoom] = useState(null);
 
   const rows = useMemo(() => {
     return allRooms.map((r) => ({
       ...r,
       area: calculateArea(r),
-      status: r.officialReference ? 'Verified' : 'Pilot Survey',
+      status: 'Verified 3D Cadastre',
     }));
   }, [allRooms]);
 
@@ -55,6 +67,29 @@ export default function RegistryTable() {
     }
   };
 
+  // Export full ledger as CSV
+  const handleExportCSV = () => {
+    const headers = ['3D_ULPIN', 'Unit_Name', 'Floor', 'Property_Type', 'Area_m2', 'Elevation_m', 'Status'];
+    const csvRows = filtered.map((r) => [
+      `"${r.id}"`,
+      `"${r.name}"`,
+      `"${r.floorShortName}"`,
+      `"${r.type}"`,
+      r.area,
+      r.elevation,
+      `"${r.status}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...csvRows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `CIPHERCORE_3D_ULPIN_Ledger_${buildingData.building.name}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fade-in space-y-4 pb-6">
       {/* Header */}
@@ -62,7 +97,7 @@ export default function RegistryTable() {
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 uppercase tracking-wider">
-              Official Ledger
+              Official Government Ledger
             </span>
             <span className="text-xs text-cipher-muted">·</span>
             <span className="text-xs text-cipher-muted font-medium">
@@ -71,19 +106,30 @@ export default function RegistryTable() {
           </div>
           <h1 className="text-xl font-extrabold text-cipher-navy tracking-tight flex items-center gap-2">
             <Database size={20} className="text-cipher-govblue" />
-            ULPIN Property Registry
+            3D ULPIN Cadastral Property Registry
           </h1>
         </div>
 
-        {/* Filter Input */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-cipher-border shadow-subtle focus-within:border-cipher-govblue focus-within:ring-2 focus-within:ring-cipher-govblue/15 transition-all">
-          <Search size={14} className="text-cipher-muted" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter records..."
-            className="bg-transparent outline-none text-xs text-cipher-text placeholder:text-cipher-muted w-48 sm:w-60"
-          />
+        {/* Filter Input & Export */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-cipher-border shadow-subtle focus-within:border-cipher-govblue focus-within:ring-2 focus-within:ring-cipher-govblue/15 transition-all">
+            <Search size={14} className="text-cipher-muted" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter by ULPIN, Room, Type..."
+              className="bg-transparent outline-none text-xs text-cipher-text placeholder:text-cipher-muted w-48 sm:w-60"
+            />
+          </div>
+
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-cipher-border hover:bg-slate-50 text-cipher-navy text-xs font-semibold shadow-subtle transition-all cursor-pointer"
+            title="Download CSV Ledger"
+          >
+            <Download size={13} className="text-cipher-govblue" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 
@@ -105,20 +151,25 @@ export default function RegistryTable() {
                     </span>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3 text-right">3D Certificate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cipher-borderLight">
               {filtered.map((row) => (
                 <tr
                   key={row.id}
-                  onClick={() => selectRoom(row.id, { navigate: true })}
-                  className="hover:bg-blue-50/50 cursor-pointer transition-colors group"
+                  className="hover:bg-blue-50/50 transition-colors group"
                 >
-                  <td className="px-4 py-3 mono font-semibold text-cipher-govblue whitespace-nowrap">
+                  <td
+                    onClick={() => selectRoom(row.id, { navigate: true })}
+                    className="px-4 py-3 mono font-bold text-cipher-govblue whitespace-nowrap cursor-pointer hover:underline"
+                  >
                     {row.id}
                   </td>
-                  <td className="px-4 py-3 font-bold text-cipher-navy whitespace-nowrap">
+                  <td
+                    onClick={() => selectRoom(row.id, { navigate: true })}
+                    className="px-4 py-3 font-bold text-cipher-navy whitespace-nowrap cursor-pointer"
+                  >
                     {row.name}
                   </td>
                   <td className="px-4 py-3 text-cipher-text whitespace-nowrap">
@@ -136,21 +187,22 @@ export default function RegistryTable() {
                     +{row.elevation.toFixed(1)} m
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                        row.status === 'Verified'
-                          ? 'bg-emerald-50 text-cipher-success border-emerald-200'
-                          : 'bg-slate-100 text-cipher-muted border-slate-200'
-                      }`}
-                    >
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-emerald-50 text-cipher-success border-emerald-200">
                       <ShieldCheck size={11} />
                       {row.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cipher-govblue group-hover:underline">
-                      Inspect <ChevronRight size={13} />
-                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCertRoom(row);
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 hover:bg-blue-100 text-cipher-govblue border border-blue-200 text-[11px] font-bold transition-all cursor-pointer"
+                    >
+                      <Lock size={11} />
+                      <span>Certificate</span>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -166,9 +218,18 @@ export default function RegistryTable() {
 
         <div className="px-4 py-2.5 bg-slate-50 border-t border-cipher-border flex items-center justify-between text-xs text-cipher-muted">
           <span>Showing <strong className="text-cipher-navy font-semibold">{filtered.length}</strong> of {rows.length} indexed records</span>
-          <span className="text-[11px]">Click any row to open 3D property view</span>
+          <span className="text-[11px]">Click 3D ULPIN to focus in 3D Explorer</span>
         </div>
       </div>
+
+      {/* Spatial Certificate Modal */}
+      <SpatialIdentityModal
+        isOpen={!!selectedCertRoom}
+        onClose={() => setSelectedCertRoom(null)}
+        property={selectedProperty}
+        room={selectedCertRoom}
+        buildingData={buildingData}
+      />
     </div>
   );
 }

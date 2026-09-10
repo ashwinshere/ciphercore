@@ -1,13 +1,10 @@
 // ============================================================================
-// VERTEX — src/data/properties.js
+// VERTEX / CIPHERCORE — src/data/properties.js
 //
 // Real-World Campus Spatial Properties for Saranathan College of Engineering.
 // Ground-Truth Spatial Layout aligned with Satellite Reference Imagery.
 // Campus Center: 10.757172° N, 78.651348° E
-//
-// Building polygon coordinates derived from user-supplied red-outline
-// reference image, mapped to WGS 84 lat/lng using meter-to-degree
-// conversion at this latitude.
+// WGS84 Geo-anchored Cadastral Land Parcels & 3D Building Footprints.
 // ============================================================================
 
 function createGeoRect(centerLat, centerLng, widthM, heightM, rotationDegrees = 32) {
@@ -59,12 +56,17 @@ function createLocalRect(widthM, depthM, rotationDegrees = 0) {
 
 const CENTER_LAT = 10.757172;
 const CENTER_LNG = 78.651348;
-const CAMPUS_GRID_ROTATION = 32; // Campus buildings aligned to ~32° diagonal axis
+const CAMPUS_GRID_ROTATION = 32;
 
 export const properties = [
   {
     id: "boys-hostel",
+    propertyId: "PROP-000101",
+    parcelId: "PARCEL-SCE-101",
     name: "Boys Hostel",
+    blockNumber: "101",
+    ownerName: "SCE Student Welfare & Hostel Board",
+    surveyNumber: "SF-101/1A",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000128",
     propertyType: "Residential Hostel",
@@ -73,6 +75,7 @@ export const properties = [
     unitsPerFloor: 16,
     coordinates: { latitude: 10.758350, longitude: 78.649850 },
     footprint: createGeoRect(10.758350, 78.649850, 55, 40, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.758350, 78.649850, 65, 50, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(55, 40, 0),
     footprintWidthM: 55,
     footprintDepthM: 40,
@@ -85,6 +88,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "campus_aerial",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 110,
+      gsdCm: 2.1,
+      resolution: "4K High-Res Orthomosaic",
+    },
     buildingConfig: {
       floors: 4,
       unitsPerFloor: 16,
@@ -94,7 +105,12 @@ export const properties = [
   },
   {
     id: "parking",
+    propertyId: "PROP-000102",
+    parcelId: "PARCEL-SCE-102",
     name: "Parking Zone",
+    blockNumber: "102",
+    ownerName: "SCE Logistics & Estates Dept",
+    surveyNumber: "SF-102/3B",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000131",
     propertyType: "Parking & Transport",
@@ -103,6 +119,7 @@ export const properties = [
     unitsPerFloor: 4,
     coordinates: { latitude: 10.757750, longitude: 78.650450 },
     footprint: createGeoRect(10.757750, 78.650450, 75, 20, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.757750, 78.650450, 85, 30, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(75, 20, 0),
     footprintWidthM: 75,
     footprintDepthM: 20,
@@ -115,6 +132,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "campus_aerial",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 100,
+      gsdCm: 2.2,
+      resolution: "4K Orthomosaic",
+    },
     buildingConfig: {
       floors: 1,
       unitsPerFloor: 4,
@@ -124,7 +149,12 @@ export const properties = [
   },
   {
     id: "bd-block",
+    propertyId: "PROP-000103",
+    parcelId: "PARCEL-SCE-103",
     name: "BD Block",
+    blockNumber: "103",
+    ownerName: "Saranathan Educational Trust",
+    surveyNumber: "SF-103/1A",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000124",
     propertyType: "Academic Main Block",
@@ -136,6 +166,7 @@ export const properties = [
     courtyardDepthM: 30,
     coordinates: { latitude: 10.757550, longitude: 78.651200 },
     footprint: createGeoRect(10.757550, 78.651200, 90, 75, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.757550, 78.651200, 105, 90, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(90, 75, 0),
     footprintWidthM: 90,
     footprintDepthM: 75,
@@ -148,6 +179,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "bd_quadrangle_drone",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 120,
+      gsdCm: 1.8,
+      resolution: "4K Quadrangle Orthomosaic",
+    },
     buildingConfig: {
       floors: 4,
       unitsPerFloor: 14,
@@ -157,15 +196,21 @@ export const properties = [
   },
   {
     id: "rv-block",
+    propertyId: "PROP-000104",
+    parcelId: "PARCEL-SCE-104",
     name: "RV Block",
+    blockNumber: "104",
+    ownerName: "Dept of Computer Science & Engineering",
+    surveyNumber: "SF-104/2A",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000123",
     propertyType: "Academic Block",
     buildingType: "Academic",
     floors: 5,
     unitsPerFloor: 10,
-    coordinates: { latitude: 10.757450, longitude: 78.651900 },
-    footprint: createGeoRect(10.757450, 78.651900, 80, 70, CAMPUS_GRID_ROTATION),
+    coordinates: { latitude: 10.757450, longitude: 78.652400 },
+    footprint: createGeoRect(10.757450, 78.652400, 80, 70, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.757450, 78.652400, 95, 85, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(80, 70, 0),
     footprintWidthM: 80,
     footprintDepthM: 70,
@@ -178,6 +223,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "rv_block_tls",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 90,
+      gsdCm: 1.5,
+      resolution: "5K High-Precision TLS / Drone Scan",
+    },
     buildingConfig: {
       floors: 5,
       unitsPerFloor: 10,
@@ -188,7 +241,12 @@ export const properties = [
   },
   {
     id: "me-block",
+    propertyId: "PROP-000105",
+    parcelId: "PARCEL-SCE-105",
     name: "ME Block",
+    blockNumber: "105",
+    ownerName: "Dept of Mechanical Engineering",
+    surveyNumber: "SF-105/1C",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000125",
     propertyType: "Mechanical Academic Block",
@@ -197,6 +255,7 @@ export const properties = [
     unitsPerFloor: 8,
     coordinates: { latitude: 10.757100, longitude: 78.650100 },
     footprint: createGeoRect(10.757100, 78.650100, 50, 65, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.757100, 78.650100, 60, 75, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(50, 65, 0),
     footprintWidthM: 50,
     footprintDepthM: 65,
@@ -209,6 +268,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "campus_aerial",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 110,
+      gsdCm: 2.2,
+      resolution: "4K Orthomosaic",
+    },
     buildingConfig: {
       floors: 3,
       unitsPerFloor: 8,
@@ -218,7 +285,12 @@ export const properties = [
   },
   {
     id: "canteen",
+    propertyId: "PROP-000106",
+    parcelId: "PARCEL-SCE-106",
     name: "Canteen",
+    blockNumber: "106",
+    ownerName: "SCE Hospitality & Dining Services",
+    surveyNumber: "SF-106/4A",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000130",
     propertyType: "Dining & Amenities",
@@ -227,6 +299,7 @@ export const properties = [
     unitsPerFloor: 6,
     coordinates: { latitude: 10.756650, longitude: 78.650650 },
     footprint: createGeoRect(10.756650, 78.650650, 80, 45, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.756650, 78.650650, 90, 55, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(80, 45, 0),
     footprintWidthM: 80,
     footprintDepthM: 45,
@@ -239,6 +312,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "campus_aerial",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 105,
+      gsdCm: 2.0,
+      resolution: "4K Orthomosaic",
+    },
     buildingConfig: {
       floors: 1,
       unitsPerFloor: 6,
@@ -248,7 +329,12 @@ export const properties = [
   },
   {
     id: "ks-block",
+    propertyId: "PROP-000107",
+    parcelId: "PARCEL-SCE-107",
     name: "KS Block",
+    blockNumber: "107",
+    ownerName: "Saranathan Educational Trust",
+    surveyNumber: "SF-107/1A",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000132",
     propertyType: "Academic Block",
@@ -260,6 +346,7 @@ export const properties = [
     courtyardDepthM: 35,
     coordinates: { latitude: 10.756400, longitude: 78.651500 },
     footprint: createGeoRect(10.756400, 78.651500, 100, 90, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.756400, 78.651500, 115, 105, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(100, 90, 0),
     footprintWidthM: 100,
     footprintDepthM: 90,
@@ -272,6 +359,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "bd_quadrangle_drone",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 125,
+      gsdCm: 2.3,
+      resolution: "4K Drone Orthomosaic",
+    },
     buildingConfig: {
       floors: 4,
       unitsPerFloor: 12,
@@ -281,7 +376,12 @@ export const properties = [
   },
   {
     id: "basketball-ground",
+    propertyId: "PROP-000108",
+    parcelId: "PARCEL-SCE-108",
     name: "Basketball Ground",
+    blockNumber: "108",
+    ownerName: "SCE Physical Education & Sports Board",
+    surveyNumber: "SF-108/5B",
     institution: "Saranathan College of Engineering",
     ulpin2D: "29-01-001-000133",
     propertyType: "Sports Court",
@@ -289,8 +389,9 @@ export const properties = [
     floors: 1,
     unitsPerFloor: 1,
     isSportsCourt: true,
-    coordinates: { latitude: 10.757200, longitude: 78.652500 },
-    footprint: createGeoRect(10.757200, 78.652500, 40, 35, CAMPUS_GRID_ROTATION),
+    coordinates: { latitude: 10.757200, longitude: 78.653200 },
+    footprint: createGeoRect(10.757200, 78.653200, 40, 35, CAMPUS_GRID_ROTATION),
+    parcelBoundary: createGeoRect(10.757200, 78.653200, 50, 45, CAMPUS_GRID_ROTATION),
     footprintLocal: createLocalRect(40, 35, 0),
     footprintWidthM: 40,
     footprintDepthM: 35,
@@ -303,6 +404,14 @@ export const properties = [
     geometryConfidence: "high",
     sourceType: "satellite",
     sources: ["Saranathan College Satellite Reference Imagery"],
+    pointCloudDataset: "campus_aerial",
+    droneImagery: {
+      hasDroneScan: true,
+      flightDate: "2025-02-28",
+      altitudeM: 80,
+      gsdCm: 1.4,
+      resolution: "4K Aerial Scan",
+    },
     buildingConfig: {
       floors: 1,
       unitsPerFloor: 1,

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  LayoutDashboard,
+  Globe,
   Box,
   Layers,
   ArrowUpDown,
@@ -8,16 +8,27 @@ import {
   Database,
   History,
   Building2,
+  Sparkles,
+  ShieldCheck,
+  Satellite,
+  Cpu,
+  CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext.jsx';
+import { getSurveys, SURVEY_STATUS } from '../services/surveyStore.js';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Land & Property Overview', icon: LayoutDashboard },
-  { id: 'explorer', label: '3D Property Map', icon: Box },
-  { id: 'floor-mapping', label: 'Building & Floor Plans', icon: Layers },
+  { id: 'dashboard', label: 'GIS Land Map', icon: Globe },
+  { id: 'drone-imagery', label: 'Drone Imagery Hub', icon: Satellite, highlight: true },
+  { id: 'lidar-pointcloud', label: 'LiDAR Point Cloud', icon: Cpu, isNew: true },
+  { id: 'surveyor-portal', label: 'Surveyor Portal', icon: Sparkles },
+  { id: 'ai-generator', label: 'AI Floor Plan to 3D', icon: Layers },
+  { id: 'pending-verification', label: 'Pending Verification', icon: ShieldCheck, hasPendingBadge: true },
+  { id: 'explorer', label: '3D Building Explorer', icon: Box },
+  { id: 'floor-mapping', label: 'Building Floor Blueprint', icon: Layers },
   { id: 'vertical-analysis', label: 'Vertical Stack Structure', icon: ArrowUpDown },
-  { id: 'conflict-detection', label: 'Spatial Audit & QA', icon: ShieldAlert },
-  { id: 'registry', label: 'ULPIN Registry', icon: Database },
+  { id: 'conflict-detection', label: 'Topology Validation & QA', icon: ShieldAlert },
+  { id: 'registry', label: '3D ULPIN Registry', icon: Database },
   { id: 'timeline', label: 'Cadastral Timeline', icon: History },
 ];
 
@@ -25,10 +36,25 @@ export default function Sidebar() {
   const { currentPage, setCurrentPage, viewMode, setViewMode, conflicts, selectedProperty } = useApp();
   const conflictCount = conflicts.length;
 
+  const [pendingSurveysCount, setPendingSurveysCount] = useState(1);
+
+  useEffect(() => {
+    try {
+      const surveys = getSurveys();
+      const count = surveys.filter((s) => s.status === SURVEY_STATUS.PENDING_VERIFICATION).length;
+      setPendingSurveysCount(count);
+    } catch {
+      // ignore
+    }
+  }, [currentPage]);
+
   const handleNavClick = (id) => {
     if (id === 'dashboard') {
       setCurrentPage('dashboard');
       setViewMode('map');
+    } else if (id === 'explorer') {
+      setCurrentPage('explorer');
+      setViewMode('3d');
     } else {
       setCurrentPage(id);
     }
@@ -42,16 +68,20 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 flex-1">
+      <div className="flex flex-col gap-1 flex-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const active = currentPage === item.id;
+          let active = currentPage === item.id;
+
+          if (currentPage === 'dashboard') {
+            if (viewMode === 'map' && item.id === 'dashboard') active = true;
+          }
 
           return (
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}
-              className={`relative flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+              className={`relative flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 active
                   ? 'bg-blue-50/80 text-cipher-navy font-semibold'
                   : 'text-cipher-muted hover:text-cipher-text hover:bg-slate-50'
@@ -65,14 +95,32 @@ export default function Sidebar() {
               <span className="flex items-center gap-2.5 truncate">
                 <Icon
                   size={16}
-                  className={active ? 'text-cipher-govblue' : 'text-slate-400'}
+                  className={active ? 'text-cipher-govblue' : item.highlight ? 'text-blue-600' : 'text-slate-400'}
                 />
                 <span className="truncate">{item.label}</span>
               </span>
 
-              {item.id === 'conflict-detection' && conflictCount > 0 && (
-                <span className="text-[10px] font-bold bg-amber-50 text-cipher-warning border border-amber-200 px-1.5 py-0.5 rounded-full">
-                  {conflictCount}
+              {item.highlight && !active && (
+                <span className="text-[9px] font-bold bg-blue-50 text-cipher-govblue border border-blue-200 px-1.5 py-0.2 rounded">
+                  UAV
+                </span>
+              )}
+
+              {item.isNew && !active && (
+                <span className="text-[9px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 px-1.5 py-0.2 rounded">
+                  LiDAR
+                </span>
+              )}
+
+              {item.hasPendingBadge && pendingSurveysCount > 0 && (
+                <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded-full">
+                  {pendingSurveysCount}
+                </span>
+              )}
+
+              {item.id === 'conflict-detection' && (
+                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                  ✓
                 </span>
               )}
             </button>
@@ -85,14 +133,14 @@ export default function Sidebar() {
         <div className="p-3 rounded-lg bg-slate-50 border border-cipher-border text-xs leading-relaxed">
           <div className="flex items-center gap-1.5 font-semibold text-cipher-navy text-[11px] mb-1">
             <Building2 size={13} className="text-cipher-govblue" />
-            <span>Active Property</span>
+            <span>Active Cadastre</span>
           </div>
           <p className="text-[11px] text-cipher-navy font-bold truncate">
-            {selectedProperty?.name || 'Saranathan Campus'}
+            {selectedProperty?.name || 'RV Block (Pilot)'}
           </p>
           <div className="mt-2 pt-2 border-t border-cipher-border/60 flex items-center justify-between text-[10px] text-cipher-muted">
-            <span>ULPIN:</span>
-            <span className="font-semibold text-cipher-govblue mono">{selectedProperty?.ulpin2D}</span>
+            <span>2D ULPIN:</span>
+            <span className="font-semibold text-cipher-govblue mono">{selectedProperty?.ulpin2D || '29-01-001-000123'}</span>
           </div>
         </div>
       </div>

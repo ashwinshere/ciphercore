@@ -11,6 +11,73 @@ import properties from './properties.js';
 const FLOOR_HEIGHT = 3.5;
 const CORRIDOR_DEPTH = 3;
 
+function getRoomTypeForProperty(property, floorIndex, side, index) {
+  const pId = property?.id || '';
+  const bType = (property?.buildingType || '').toLowerCase();
+  const pType = (property?.propertyType || '').toLowerCase();
+
+  // 1. Hostel / Residential
+  if (bType === 'hostel' || pId === 'boys-hostel' || pType.includes('hostel') || pType.includes('residential')) {
+    if (floorIndex === 0) {
+      if (side === 'north') {
+        const groundNorth = ['Warden Office', 'Student Lounge', 'Recreation Room', 'Linen Store', 'Study Room', 'Medical Room'];
+        return groundNorth[index % groundNorth.length];
+      } else {
+        const groundSouth = ['Hostel Reception', 'Visitor Lounge', 'Common Room', 'Canteen Antechamber'];
+        return groundSouth[index % groundSouth.length];
+      }
+    } else {
+      if (side === 'north') {
+        const upperNorth = ['Dormitory Room', 'Double Occupancy Room', 'Single Deluxe Room', 'Resident Suite', 'Study Room'];
+        return upperNorth[index % upperNorth.length];
+      } else {
+        const upperSouth = ['Dormitory Room', 'Double Occupancy Room', 'Triple Sharing Room', 'Resident Room'];
+        return upperSouth[index % upperSouth.length];
+      }
+    }
+  }
+
+  // 2. Parking
+  if (pId === 'parking' || pType.includes('parking')) {
+    const slots = ['Covered Vehicle Bay', 'Two-Wheeler Slot', 'EV Charging Station', 'Logistics Bay', 'Security Kiosk'];
+    return slots[index % slots.length];
+  }
+
+  // 3. Canteen / Dining
+  if (pId === 'canteen' || pType.includes('dining') || pType.includes('amenities')) {
+    const canteenTypes = ['Main Dining Hall', 'Kitchen & Food Prep', 'Service Counter', 'Storage & Cold Room', 'Staff Mess', 'Billing Counter'];
+    return canteenTypes[index % canteenTypes.length];
+  }
+
+  // 4. Sports
+  if (pId === 'basketball-ground' || bType === 'sports' || pType.includes('sports')) {
+    const sportsTypes = ['Primary Play Court', 'Equipment Store', 'Pavilion & Bench Area', 'Official Scoring Station'];
+    return sportsTypes[index % sportsTypes.length];
+  }
+
+  // 5. Mechanical Academic
+  if (pId === 'me-block' || pType.includes('mechanical')) {
+    if (floorIndex === 0) {
+      const groundMech = ['Heavy Workshop', 'Machinery & Heat Transfer Lab', 'Fluid Mechanics Lab', 'Department Office'];
+      return groundMech[index % groundMech.length];
+    } else {
+      const upperMech = ['CAD/CAM Simulation Lab', 'Mechatronics Lab', 'Department Faculty Room', 'Lecture Room'];
+      return upperMech[index % upperMech.length];
+    }
+  }
+
+  // 6. Standard Academic (BD Block, RV Block, KS Block, default)
+  if (floorIndex === 0) {
+    return side === 'north'
+      ? (index === 0 ? 'Administrative Office' : 'Department Office')
+      : (index === 0 ? 'Reception' : 'Faculty Lounge');
+  } else {
+    return side === 'north'
+      ? (index % 2 === 0 ? 'Classroom' : 'Common Laboratory')
+      : (index % 2 === 0 ? 'Tutorial Room' : 'Seminar Hall');
+  }
+}
+
 function generateRoomsForFloor(floorIndex, floorId, property) {
   const rooms = [];
   const buildingWidth = property.footprintWidthM || 60;
@@ -38,14 +105,23 @@ function generateRoomsForFloor(floorIndex, floorId, property) {
     // Strict 3D ULPIN format: [2D-ULPIN]-[FLOOR-ID]-U[UNIT-ID]
     const roomId = `${property.ulpin2D}-${floorId}-U${unitNumStr}`;
     const isKnown = config.knownRooms?.includes(`${prefix}${floorIndex + 1}0${i + 1}`);
+    const roomName = `${prefix}-${floorIndex + 1}0${i + 1}`;
+    const roomType = getRoomTypeForProperty(property, floorIndex, 'north', i);
 
     rooms.push({
       id: roomId,
+      ulpin3D: roomId,
+      ulpin2D: property.ulpin2D,
       floorId: floorId,
       number: `U${unitNumStr}`,
       unitSeq: unitSeq,
-      name: `${prefix}-${floorIndex + 1}0${i + 1}`,
-      type: floorIndex === 0 ? 'Administrative Office' : (i % 2 === 0 ? 'Classroom' : 'Common Laboratory'),
+      name: roomName,
+      type: roomType,
+      blockNumber: property.blockNumber ? `Block ${property.blockNumber}` : 'Block 100',
+      ownerName: property.ownerName || 'Saranathan Educational Trust',
+      surveyNumber: `${property.surveyNumber || 'SF-100/1'}-${floorIndex + 1}0${i + 1}`,
+      buildingName: property.name,
+      cadastreStatus: 'Verified 3D Record',
       x: x - roomWidth / 2,
       y: northZ - roomDepth / 2,
       width: roomWidth - 0.4,
@@ -67,14 +143,23 @@ function generateRoomsForFloor(floorIndex, floorId, property) {
     const unitNumStr = String(unitSeq).padStart(3, '0');
     const roomId = `${property.ulpin2D}-${floorId}-U${unitNumStr}`;
     const isKnown = config.knownRooms?.includes(`${prefix}${floorIndex + 1}0${i + 1}`);
+    const roomName = `${prefix}-${floorIndex + 1}0${i + roomsPerSide + 1}`;
+    const roomType = getRoomTypeForProperty(property, floorIndex, 'south', i);
 
     rooms.push({
       id: roomId,
+      ulpin3D: roomId,
+      ulpin2D: property.ulpin2D,
       floorId: floorId,
       number: `U${unitNumStr}`,
       unitSeq: unitSeq,
-      name: `${prefix}-${floorIndex + 1}0${i + roomsPerSide + 1}`,
-      type: floorIndex === 0 ? 'Reception' : (i % 2 === 0 ? 'Tutorial Room' : 'Seminar Hall'),
+      name: roomName,
+      type: roomType,
+      blockNumber: property.blockNumber ? `Block ${property.blockNumber}` : 'Block 100',
+      ownerName: property.ownerName || 'Saranathan Educational Trust',
+      surveyNumber: `${property.surveyNumber || 'SF-100/1'}-${floorIndex + 1}0${i + roomsPerSide + 1}`,
+      buildingName: property.name,
+      cadastreStatus: 'Verified 3D Record',
       x: x - roomWidth / 2,
       y: southZ - roomDepth / 2,
       width: roomWidth - 0.4,
@@ -121,6 +206,9 @@ export function generateBuildingData(property = properties[0]) {
     building: {
       id: property.id,
       name: property.name,
+      blockNumber: property.blockNumber ? `Block ${property.blockNumber}` : 'Block 100',
+      ownerName: property.ownerName || 'Saranathan Educational Trust',
+      surveyNumber: property.surveyNumber || 'SF-100/1A',
       institution: property.institution || 'Saranathan College of Engineering',
       location: 'Panjappur, Tiruchirappalli, Tamil Nadu',
       state: 'Tamil Nadu',

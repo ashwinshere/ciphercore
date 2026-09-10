@@ -1,26 +1,40 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AppProvider, useApp } from './context/AppContext.jsx';
-import WelcomeModal from './components/WelcomeModal.jsx';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import GISExplorer from './pages/GISExplorer.jsx';
 import Explorer from './pages/Explorer.jsx';
 import FloorMapping from './pages/FloorMapping.jsx';
 import VerticalAnalysis from './pages/VerticalAnalysis.jsx';
 import ConflictDetection from './pages/ConflictDetection.jsx';
 import Registry from './pages/Registry.jsx';
 import Timeline from './pages/Timeline.jsx';
+import SatelliteView from './pages/SatelliteView.jsx';
+import DroneImageryHub from './pages/DroneImageryHub.jsx';
+import LidarPointCloud from './pages/LidarPointCloud.jsx';
+import SurveyorPortal from './pages/SurveyorPortal.jsx';
+import AIGeneratorWizard from './pages/AIGeneratorWizard.jsx';
+import PendingVerification from './pages/PendingVerification.jsx';
+import WelcomeModal from './components/WelcomeModal.jsx';
 
 const PAGES = {
   dashboard: Dashboard,
+  'gis-explorer': GISExplorer,
+  'drone-imagery': DroneImageryHub,
+  'lidar-pointcloud': LidarPointCloud,
+  'surveyor-portal': SurveyorPortal,
+  'ai-generator': AIGeneratorWizard,
+  'pending-verification': PendingVerification,
   explorer: Explorer,
   'floor-mapping': FloorMapping,
   'vertical-analysis': VerticalAnalysis,
   'conflict-detection': ConflictDetection,
   registry: Registry,
   timeline: Timeline,
+  'satellite-view': SatelliteView,
 };
 
 function Layout() {
@@ -30,7 +44,6 @@ function Layout() {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cipher-bg text-cipher-text gis-grid-bg">
       <WelcomeModal />
->>>>>>>>> Temporary merge branch 2
       <Navbar />
       <div className="flex-1 flex overflow-hidden min-h-0">
         <Sidebar />

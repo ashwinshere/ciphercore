@@ -1,6 +1,6 @@
 import React from 'react';
-import ConflictPanel from '../components/ConflictPanel.jsx';
+import TopologyValidation from './TopologyValidation.jsx';
 
 export default function ConflictDetection() {
-  return <ConflictPanel />;
+  return <TopologyValidation />;
 }
